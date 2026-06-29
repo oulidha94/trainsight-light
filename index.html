@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trainsight Light — Gestion de la formation</title>
+<meta name="description" content="Trainsight Light automatise le workflow de gestion de la formation : collecte des besoins, plan, déploiement, évaluation et mesure d'impact.">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #12120f;
+    --ink-mid: #3a3a32;
+    --ink-light: #6b6b5a;
+    --ink-muted: #a0a090;
+    --paper: #f5f2eb;
+    --paper-warm: #ede8dc;
+    --paper-dark: #e0d9cc;
+    --rule: #d4cebf;
+    --accent: #c8523a;
+    --accent-dim: rgba(200,82,58,0.12);
+    --teal: #2d6a6a;
+    --teal-dim: rgba(45,106,106,0.1);
+    --gold: #9a7b1e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── HEADER ─────────────────────────────────────────── */
+  header {
+    border-bottom: 1px solid var(--rule);
+    padding: 0 2.5rem;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: var(--paper);
+    z-index: 50;
+  }
+
+  .logo {
+    font-family: 'Fraunces', serif;
+    font-size: 1.05rem;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    color: var(--ink);
+    display: flex;
+    align-items: baseline;
+    gap: 0.15em;
+  }
+  .logo em {
+    font-style: italic;
+    color: var(--accent);
+    font-weight: 300;
+  }
+  .logo-badge {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    border: 1px solid var(--rule);
+    padding: 0.15rem 0.5rem;
+    border-radius: 2px;
+    margin-left: 0.6rem;
+    vertical-align: middle;
+  }
+
+  .header-right {
+    font-size: 0.75rem;
+    color: var(--ink-muted);
+    letter-spacing: 0.04em;
+  }
+
+  /* ─── HERO ────────────────────────────────────────────── */
+  .hero {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 6rem 2.5rem 5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+
+  .hero-left {}
+
+  .hero-eyebrow {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .hero-title {
+    font-family: 'Fraunces', serif;
+    font-size: 3rem;
+    font-weight: 300;
+    line-height: 1.12;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    margin-bottom: 1.5rem;
+  }
+  .hero-title em {
+    font-style: italic;
+    font-weight: 300;
+    color: var(--ink-mid);
+  }
+
+  .hero-desc {
+    font-size: 0.95rem;
+    line-height: 1.75;
+    color: var(--ink-light);
+    margin-bottom: 2.5rem;
+    max-width: 380px;
+  }
+
+  .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--ink);
+    color: var(--paper);
+    text-decoration: none;
+    padding: 0.85rem 1.8rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    border-radius: 3px;
+    transition: background 0.18s, transform 0.18s;
+  }
+  .hero-cta:hover {
+    background: var(--accent);
+    transform: translateY(-1px);
+  }
+  .hero-cta svg { transition: transform 0.18s; }
+  .hero-cta:hover svg { transform: translateX(3px); }
+
+  /* ─── HERO RIGHT — Workflow visuel ───────────────────── */
+  .hero-right {
+    position: relative;
+  }
+
+  .workflow-visual {
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(18,18,15,0.08), 0 1px 4px rgba(18,18,15,0.05);
+  }
+
+  .wv-header {
+    background: var(--ink);
+    padding: 0.85rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .wv-dot { width: 9px; height: 9px; border-radius: 50%; }
+  .wv-dot:nth-child(1) { background: #ff5f57; }
+  .wv-dot:nth-child(2) { background: #febc2e; }
+  .wv-dot:nth-child(3) { background: #28c840; }
+  .wv-title-bar {
+    flex: 1;
+    background: rgba(255,255,255,0.08);
+    border-radius: 3px;
+    height: 20px;
+    margin: 0 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.06em;
+  }
+
+  .wv-body { padding: 1.2rem; }
+
+  .wv-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.9rem;
+    padding: 0.8rem;
+    border-radius: 5px;
+    margin-bottom: 0.5rem;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+    cursor: default;
+  }
+  .wv-step:last-child { margin-bottom: 0; }
+  .wv-step.active {
+    background: var(--accent-dim);
+    border-color: rgba(200,82,58,0.2);
+  }
+  .wv-step.upcoming {
+    background: var(--paper);
+    border-color: var(--rule);
+    opacity: 0.6;
+  }
+
+  .wv-step-num {
+    width: 26px;
+    height: 26px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    font-family: 'Fraunces', serif;
+  }
+  .wv-step.active .wv-step-num { background: var(--accent); color: white; }
+  .wv-step.upcoming .wv-step-num { background: var(--paper-dark); color: var(--ink-muted); }
+
+  .wv-step-info {}
+  .wv-step-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 0.15rem;
+  }
+  .wv-step.upcoming .wv-step-label { color: var(--ink-muted); }
+  .wv-step-desc {
+    font-size: 0.7rem;
+    color: var(--ink-light);
+    line-height: 1.5;
+  }
+  .wv-step.upcoming .wv-step-desc { color: var(--ink-muted); }
+
+  .wv-badge {
+    margin-left: auto;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.55rem;
+    border-radius: 2px;
+    flex-shrink: 0;
+    align-self: center;
+  }
+  .badge-live { background: var(--accent); color: white; }
+  .badge-soon { background: var(--paper-dark); color: var(--ink-muted); }
+
+  .wv-connector {
+    width: 1px;
+    height: 12px;
+    background: var(--rule);
+    margin: 0 0 0 21px;
+  }
+
+  /* ─── DIVIDER ─────────────────────────────────────────── */
+  .section-divider {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 2.5rem;
+    border-top: 1px solid var(--rule);
+  }
+
+  /* ─── MODULES ─────────────────────────────────────────── */
+  .modules {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 4rem 2.5rem;
+  }
+
+  .modules-eyebrow {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .modules-eyebrow::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  .modules-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .module-card {
+    background: white;
+    padding: 1.8rem;
+    position: relative;
+    transition: background 0.15s;
+  }
+  .module-card.live:hover { background: var(--paper); }
+  .module-card.inactive { background: var(--paper); }
+
+  .module-letter {
+    font-family: 'Fraunces', serif;
+    font-size: 3.5rem;
+    font-weight: 300;
+    line-height: 1;
+    margin-bottom: 1rem;
+    display: block;
+  }
+  .module-card.live .module-letter { color: var(--accent); }
+  .module-card.inactive .module-letter { color: var(--rule); }
+
+  .module-name {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 0.4rem;
+  }
+
+  .module-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.1rem;
+    font-weight: 400;
+    line-height: 1.3;
+    margin-bottom: 0.8rem;
+    color: var(--ink);
+  }
+  .module-card.inactive .module-title { color: var(--ink-muted); }
+
+  .module-steps {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-bottom: 1.4rem;
+  }
+  .module-steps li {
+    font-size: 0.78rem;
+    color: var(--ink-light);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    line-height: 1.5;
+  }
+  .module-card.inactive .module-steps li { color: var(--ink-muted); }
+  .module-steps li::before {
+    content: '→';
+    font-size: 0.65rem;
+    color: var(--ink-muted);
+    flex-shrink: 0;
+    margin-top: 0.25rem;
+  }
+  .module-card.live .module-steps li::before { color: var(--accent); }
+
+  .module-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    padding: 0.55rem 1rem;
+    border-radius: 3px;
+    transition: all 0.15s;
+  }
+  .module-cta.live {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .module-cta.live:hover { background: var(--accent); }
+  .module-cta.soon {
+    background: none;
+    color: var(--ink-muted);
+    border: 1px solid var(--rule);
+    cursor: default;
+    pointer-events: none;
+  }
+
+  /* ─── PRINCIPE ────────────────────────────────────────── */
+  .principe {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 2.5rem 5rem;
+  }
+
+  .principe-inner {
+    background: var(--ink);
+    border-radius: 6px;
+    padding: 3rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .principe-left {}
+
+  .principe-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+
+  .principe-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.6rem;
+    font-weight: 300;
+    line-height: 1.3;
+    color: var(--paper);
+    margin-bottom: 1.2rem;
+  }
+  .principe-title em { font-style: italic; color: rgba(245,242,235,0.6); }
+
+  .principe-text {
+    font-size: 0.85rem;
+    line-height: 1.75;
+    color: rgba(245,242,235,0.55);
+  }
+
+  .principe-right {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .principe-item {
+    border-left: 2px solid rgba(245,242,235,0.1);
+    padding-left: 1.2rem;
+  }
+  .principe-item:first-child { border-left-color: var(--accent); }
+
+  .principe-item-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--paper);
+    margin-bottom: 0.3rem;
+  }
+  .principe-item-text {
+    font-size: 0.78rem;
+    line-height: 1.65;
+    color: rgba(245,242,235,0.45);
+  }
+
+  /* ─── FOOTER ──────────────────────────────────────────── */
+  footer {
+    border-top: 1px solid var(--rule);
+    padding: 1.5rem 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  footer p {
+    font-size: 0.72rem;
+    color: var(--ink-muted);
+    letter-spacing: 0.03em;
+  }
+
+  footer a {
+    color: var(--ink-muted);
+    text-decoration: none;
+    font-size: 0.72rem;
+    transition: color 0.15s;
+  }
+  footer a:hover { color: var(--accent); }
+
+  /* ─── ANIMATION ───────────────────────────────────────── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero-left { animation: fadeUp 0.6s ease both; }
+  .hero-right { animation: fadeUp 0.6s 0.15s ease both; }
+
+  /* ─── RESPONSIVE ──────────────────────────────────────── */
+  @media (max-width: 720px) {
+    .hero { grid-template-columns: 1fr; gap: 2.5rem; padding: 3.5rem 1.5rem 3rem; }
+    .hero-title { font-size: 2.2rem; }
+    .modules-grid { grid-template-columns: 1fr; }
+    .principe-inner { grid-template-columns: 1fr; gap: 2rem; padding: 2rem; }
+    header { padding: 0 1.5rem; }
+    .modules, .principe, footer { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .hero-right { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    Train<em>sight</em>
+    <span class="logo-badge">Light</span>
+  </div>
+  <div class="header-right">Version démo — Module A actif</div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+
+  <div class="hero-left">
+    <div class="hero-eyebrow">Gestion de la formation</div>
+    <h1 class="hero-title">
+      Du besoin exprimé<br>
+      au <em>résultat mesuré</em>
+    </h1>
+    <p class="hero-desc">
+      Trainsight Light automatise le workflow complet de gestion de la formation : collecte structurée des besoins, validation hiérarchique, plan chiffré, déploiement et mesure d'impact avant/après.
+    </p>
+    <a href="module-a-collecte.html" class="hero-cta">
+      Accéder au Module A
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </a>
+  </div>
+
+  <div class="hero-right">
+    <div class="workflow-visual">
+      <div class="wv-header">
+        <div class="wv-dot"></div>
+        <div class="wv-dot"></div>
+        <div class="wv-dot"></div>
+        <div class="wv-title-bar">trainsight-light / module-a</div>
+      </div>
+      <div class="wv-body">
+
+        <div class="wv-step active">
+          <div class="wv-step-num">A</div>
+          <div class="wv-step-info">
+            <div class="wv-step-label">Collecter</div>
+            <div class="wv-step-desc">Formulaire agent, validation manager, tableau consolidé RH</div>
+          </div>
+          <div class="wv-badge badge-live">Actif</div>
+        </div>
+
+        <div class="wv-connector"></div>
+
+        <div class="wv-step upcoming">
+          <div class="wv-step-num">B</div>
+          <div class="wv-step-info">
+            <div class="wv-step-label">Planifier & Déployer</div>
+            <div class="wv-step-desc">Plan chiffré, cahier des charges, logistique, courriels</div>
+          </div>
+          <div class="wv-badge badge-soon">Bientôt</div>
+        </div>
+
+        <div class="wv-connector"></div>
+
+        <div class="wv-step upcoming">
+          <div class="wv-step-num">C</div>
+          <div class="wv-step-info">
+            <div class="wv-step-label">Évaluer & Mesurer</div>
+            <div class="wv-step-desc">Éval. à chaud, à froid, impact avant/après, rapport annuel</div>
+          </div>
+          <div class="wv-badge badge-soon">Bientôt</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<div class="section-divider"></div>
+
+<!-- MODULES -->
+<section class="modules">
+  <div class="modules-eyebrow">Les trois modules</div>
+  <div class="modules-grid">
+
+    <div class="module-card live">
+      <span class="module-letter">A</span>
+      <div class="module-name">Module A</div>
+      <div class="module-title">Collecter les besoins</div>
+      <ul class="module-steps">
+        <li>Formulaire agent avec classification A/B/C/D</li>
+        <li>Objectif et indicateurs d'impact saisis dès l'expression</li>
+        <li>Validation manager besoin par besoin (OUI/NON, priorité, période)</li>
+        <li>Tableau RH consolidé et export CSV</li>
+      </ul>
+      <a href="module-a-collecte.html" class="module-cta live">
+        Ouvrir
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+
+    <div class="module-card inactive">
+      <span class="module-letter">B</span>
+      <div class="module-name">Module B</div>
+      <div class="module-title">Planifier & Déployer</div>
+      <ul class="module-steps">
+        <li>Plan de formation chiffré et priorisé (DG/CCE)</li>
+        <li>Cahier des charges et sélection prestataires</li>
+        <li>Calendrier prévisionnel par trimestre</li>
+        <li>Courriels d'invitation aux participants</li>
+      </ul>
+      <span class="module-cta soon">En développement</span>
+    </div>
+
+    <div class="module-card inactive">
+      <span class="module-letter">C</span>
+      <div class="module-name">Module C</div>
+      <div class="module-title">Évaluer & Mesurer</div>
+      <ul class="module-steps">
+        <li>Fiche d'évaluation à chaud (satisfaction + acquis)</li>
+        <li>Évaluation à froid — transfert en situation de travail</li>
+        <li>Mesure d'impact avant/après poste et unité</li>
+        <li>Rapport annuel de réalisation</li>
+      </ul>
+      <span class="module-cta soon">En développement</span>
+    </div>
+
+  </div>
+</section>
+
+<!-- PRINCIPE CLÉ -->
+<section class="principe">
+  <div class="principe-inner">
+    <div class="principe-left">
+      <div class="principe-label">Principe fondateur</div>
+      <h2 class="principe-title">
+        L'objectif est fixé<br>
+        <em>au moment du besoin,<br>pas en fin d'année</em>
+      </h2>
+      <p class="principe-text">
+        Trainsight Light ancre la mesure d'impact dès la collecte. Chaque agent définit ce qui changera dans son poste et dans son unité grâce à la formation. Ce sont ces indicateurs qui seront mesurés 3 mois après, pas une satisfaction générale.
+      </p>
+    </div>
+    <div class="principe-right">
+      <div class="principe-item">
+        <div class="principe-item-title">Niveau poste</div>
+        <div class="principe-item-text">Qu'est-ce qui sera différent dans la pratique quotidienne de l'agent ? Quel comportement, quel taux, quelle maîtrise ?</div>
+      </div>
+      <div class="principe-item">
+        <div class="principe-item-title">Niveau unité</div>
+        <div class="principe-item-text">Quel indicateur de l'équipe ou du service évoluera ? Incidents, délais, qualité, absentéisme — mesurable avant et après.</div>
+      </div>
+      <div class="principe-item">
+        <div class="principe-item-title">Traçabilité complète</div>
+        <div class="principe-item-text">Du besoin exprimé en Module A au rapport annuel en Module C, chaque formation est tracée avec son objectif et sa mesure d'impact.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>Trainsight Light — Version démo · 2025</p>
+  <a href="module-a-collecte.html">Accéder au Module A →</a>
+</footer>
+
+</body>
+</html>

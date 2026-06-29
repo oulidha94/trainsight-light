@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module C — Évaluer & Mesurer l'impact</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --ink-light: #4a4a6a;
+    --ink-muted: #8888aa;
+    --cream: #f7f5f0;
+    --cream-dark: #ede9e1;
+    --accent: #7b3a8e;
+    --accent-light: #f0e8f5;
+    --accent-2: #c8523a;
+    --gold: #b8860b;
+    --gold-light: #fdf6e0;
+    --valid: #2d6a4a;
+    --valid-light: #e0efea;
+    --teal: #2d6a6a;
+    --teal-light: #e0efef;
+    --border: #ddd8ce;
+    --shadow: 0 2px 12px rgba(26,26,46,0.08);
+    --shadow-lg: 0 8px 32px rgba(26,26,46,0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; }
+
+  /* NAV */
+  .nav { background: var(--ink); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 100; }
+  .nav-brand { font-family: 'DM Serif Display', serif; color: var(--cream); font-size: 1.1rem; }
+  .nav-brand span { color: var(--accent); }
+  .nav-tabs { display: flex; height: 100%; }
+  .nav-tab { padding: 0 1.4rem; background: none; border: none; color: var(--ink-muted); font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; height: 100%; }
+  .nav-tab:hover { color: var(--cream); }
+  .nav-tab.active { color: var(--cream); border-bottom-color: var(--accent); }
+
+  /* VIEWS */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* PAGE HEADER */
+  .page-header { background: #1a0d26; color: var(--cream); padding: 3rem 2rem 2.5rem; position: relative; overflow: hidden; }
+  .page-header::before { content: 'C'; position: absolute; right: 2rem; top: 50%; transform: translateY(-50%); font-family: 'DM Serif Display', serif; font-size: 8rem; color: rgba(255,255,255,0.04); line-height: 1; pointer-events: none; }
+  .page-header .step-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.6rem; }
+  .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 2rem; line-height: 1.2; margin-bottom: 0.5rem; }
+  .page-header p { color: rgba(247,245,240,0.6); font-size: 0.9rem; max-width: 520px; }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 2.5rem 2rem; }
+
+  /* SECTION */
+  .section { background: white; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 1.5rem; box-shadow: var(--shadow); overflow: hidden; }
+  .section-header { padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.8rem; background: var(--cream); }
+  .section-icon { width: 32px; height: 32px; border-radius: 6px; background: var(--ink); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+  .section-title { font-size: 0.85rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink); }
+  .section-body { padding: 1.5rem; }
+
+  /* FORM */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+  .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+  .form-group.full { grid-column: 1 / -1; }
+  label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-light); }
+  label .req { color: var(--accent-2); margin-left: 2px; }
+  input, select, textarea { font-family: 'DM Sans', sans-serif; font-size: 0.9rem; padding: 0.6rem 0.9rem; border: 1px solid var(--border); border-radius: 5px; background: var(--cream); color: var(--ink); transition: border-color 0.15s, background 0.15s; outline: none; width: 100%; }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); background: white; }
+  textarea { resize: vertical; min-height: 80px; }
+
+  /* INNER TABS */
+  .inner-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+  .inner-tab { padding: 0.8rem 1.5rem; background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -1px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600; color: var(--ink-muted); cursor: pointer; transition: all 0.15s; }
+  .inner-tab:hover { color: var(--ink); }
+  .inner-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .inner-panel { display: none; }
+  .inner-panel.active { display: block; }
+
+  /* STAR RATING */
+  .star-group { display: flex; gap: 0.3rem; }
+  .star { font-size: 1.5rem; cursor: pointer; color: #ddd; transition: color 0.1s; line-height: 1; }
+  .star.active { color: #f0a500; }
+  .star:hover { color: #f0a500; }
+
+  /* LIKERT */
+  .likert { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .likert-btn { padding: 0.4rem 0.8rem; border: 1.5px solid var(--border); border-radius: 4px; background: none; font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.15s; color: var(--ink-muted); }
+  .likert-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .likert-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+  /* EVAL CARD */
+  .eval-card { background: white; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 1.2rem; }
+  .eval-card-header { padding: 1rem 1.5rem; background: var(--ink); color: var(--cream); display: flex; align-items: center; justify-content: space-between; }
+  .eval-card-body { padding: 1.5rem; }
+
+  /* IMPACT COMPARISON */
+  .impact-compare { display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; align-items: center; margin: 1rem 0; }
+  .impact-box { border: 1px solid var(--border); border-radius: 8px; padding: 1.2rem; }
+  .impact-box.before { border-left: 4px solid var(--accent-2); background: #fff8f7; }
+  .impact-box.after { border-left: 4px solid var(--valid); background: var(--valid-light); }
+  .impact-box .label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.6rem; }
+  .impact-box.before .label { color: var(--accent-2); }
+  .impact-box.after .label { color: var(--valid); }
+  .impact-box input { background: rgba(255,255,255,0.8); }
+  .impact-arrow { font-size: 1.5rem; color: var(--ink-muted); text-align: center; }
+
+  /* RAPPORT TABLE */
+  .rapport-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .rapport-table th { padding: 0.7rem 1rem; text-align: left; background: var(--ink); color: var(--cream); font-size: 0.68rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; }
+  .rapport-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .rapport-table tr:last-child td { border-bottom: none; }
+  .rapport-table tr:hover td { background: var(--cream); }
+
+  /* STATS STRIP */
+  .stats-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 1.5rem; box-shadow: var(--shadow); }
+  .stat-cell { background: white; padding: 1rem 1.5rem; display: flex; flex-direction: column; gap: 0.25rem; }
+  .stat-value { font-family: 'DM Serif Display', serif; font-size: 1.8rem; color: var(--ink); line-height: 1; }
+  .stat-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-muted); }
+
+  /* GAUGE */
+  .gauge-wrap { margin: 0.4rem 0; }
+  .gauge-bar { height: 6px; background: var(--cream-dark); border-radius: 3px; overflow: hidden; }
+  .gauge-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
+  .gauge-label { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--ink-muted); margin-top: 0.2rem; }
+
+  /* STATUS BADGE */
+  .status-badge { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+  .badge-success { background: var(--valid-light); color: var(--valid); }
+  .badge-partial { background: var(--gold-light); color: var(--gold); }
+  .badge-fail { background: #ffe5e0; color: var(--accent-2); }
+
+  /* AI RESULT */
+  .ai-result { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; box-shadow: var(--shadow); margin-top: 1.5rem; }
+  .ai-result-header { padding: 1rem 1.5rem; background: var(--ink); color: var(--cream); display: flex; align-items: center; justify-content: space-between; }
+  .ai-result-header .label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(247,245,240,0.6); }
+  .ai-result-header .title { font-family: 'DM Serif Display', serif; font-size: 1.1rem; }
+  .ai-result-body { padding: 1.5rem; background: white; }
+  .ai-result-body pre { white-space: pre-wrap; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; line-height: 1.7; color: var(--ink); }
+
+  /* BUTTONS */
+  .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: 5px; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; letter-spacing: 0.03em; }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #612f73; }
+  .btn-secondary { background: white; color: var(--ink); border: 1.5px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--ink); }
+  .btn-sm { padding: 0.4rem 0.9rem; font-size: 0.78rem; }
+  .btn-loading { opacity: 0.7; pointer-events: none; }
+  .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .form-actions { display: flex; align-items: center; justify-content: flex-end; gap: 0.8rem; padding-top: 1.5rem; border-top: 1px solid var(--border); margin-top: 1.5rem; }
+
+  /* EXPORT BAR */
+  .export-bar { background: var(--ink); border-radius: 8px; padding: 1.2rem 1.5rem; display: flex; align-items: center; justify-content: space-between; margin-top: 1.5rem; gap: 1rem; flex-wrap: wrap; }
+  .export-bar p { color: rgba(247,245,240,0.7); font-size: 0.82rem; }
+  .export-bar strong { color: var(--cream); }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--ink); color: var(--cream); padding: 0.9rem 1.4rem; border-radius: 6px; font-size: 0.85rem; font-weight: 500; box-shadow: var(--shadow-lg); z-index: 999; transform: translateY(100px); opacity: 0; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); display: flex; align-items: center; gap: 0.6rem; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { border-left: 3px solid var(--valid); }
+  .toast.info { border-left: 3px solid var(--accent); }
+  .toast.error { border-left: 3px solid var(--accent-2); }
+
+  /* PRINT */
+  @media print { .nav, .form-actions, .export-bar, .btn { display: none !important; } }
+  .text-muted { color: var(--ink-muted); font-size: 0.82rem; }
+  .divider { height: 1px; background: var(--border); margin: 1.2rem 0; }
+
+  @media (max-width: 640px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .stats-strip { grid-template-columns: 1fr 1fr; }
+    .impact-compare { grid-template-columns: 1fr; }
+    .impact-arrow { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-brand" style="text-decoration:none;">Train<span>Sight</span> <span style="font-size:0.65rem;font-weight:600;letter-spacing:0.1em;color:var(--ink-muted);font-family:'DM Sans',sans-serif;">Light</span></a>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showTab('chaud')">Éval. à chaud</button>
+    <button class="nav-tab" onclick="showTab('froid')">Éval. à froid & Impact</button>
+    <button class="nav-tab" onclick="showTab('rapport')">Rapport annuel</button>
+  </div>
+  <div style="display:flex;gap:0.3rem;align-items:center;">
+    <a href="module-a-collecte.html" style="padding:0.35rem 0.8rem;font-size:0.72rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-muted);text-decoration:none;border:1px solid rgba(255,255,255,0.1);border-radius:3px;transition:all 0.15s;" onmouseover="this.style.color='var(--cream)';this.style.borderColor='rgba(255,255,255,0.3)'" onmouseout="this.style.color='var(--ink-muted)';this.style.borderColor='rgba(255,255,255,0.1)'">← Module A</a>
+    <a href="module-b-planifier.html" style="padding:0.35rem 0.8rem;font-size:0.72rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-muted);text-decoration:none;border:1px solid rgba(255,255,255,0.1);border-radius:3px;transition:all 0.15s;" onmouseover="this.style.color='var(--cream)';this.style.borderColor='rgba(255,255,255,0.3)'" onmouseout="this.style.color='var(--ink-muted)';this.style.borderColor='rgba(255,255,255,0.1)'">← Module B</a>
+  </div>
+</nav>
+
+<!-- ============================================================ -->
+<!-- TAB 1 — EVALUATION A CHAUD -->
+<!-- ============================================================ -->
+<div class="view active" id="view-chaud">
+
+  <div class="page-header">
+    <div class="step-label">Module C — Évaluer · Étape 1/3</div>
+    <h1>Évaluation à chaud<br><em>en fin de formation</em></h1>
+    <p>Fiche de satisfaction et d'évaluation des acquis, distribuée aux participants à l'issue de la séance.</p>
+  </div>
+
+  <div class="container">
+
+    <div class="inner-tabs">
+      <button class="inner-tab active" onclick="switchInner('gen-chaud','chaud')">Générer la fiche</button>
+      <button class="inner-tab" onclick="switchInner('saisie-chaud','chaud')">Saisir les résultats</button>
+    </div>
+
+    <!-- GENERATION FICHE -->
+    <div class="inner-panel active" id="panel-gen-chaud">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon">01</div>
+          <span class="section-title">Paramètres de la formation</span>
+        </div>
+        <div class="section-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Intitulé de la formation <span class="req">*</span></label>
+              <input type="text" id="ch-formation" placeholder="Ex : Sécurité au travail — HSE Niveau 1">
+            </div>
+            <div class="form-group">
+              <label>Date(s)</label>
+              <input type="text" id="ch-date" placeholder="Ex : 20-21 janvier 2025">
+            </div>
+            <div class="form-group">
+              <label>Formateur / Cabinet</label>
+              <input type="text" id="ch-formateur" placeholder="Ex : Cabinet Formation Pro">
+            </div>
+            <div class="form-group">
+              <label>Lieu</label>
+              <input type="text" id="ch-lieu" placeholder="Ex : Siège — Salle B2">
+            </div>
+            <div class="form-group">
+              <label>Population formée</label>
+              <input type="text" id="ch-population" placeholder="Ex : Techniciens de maintenance — Unité 1">
+            </div>
+            <div class="form-group">
+              <label>Objectifs pédagogiques</label>
+              <input type="text" id="ch-objectifs" placeholder="Ex : Maîtriser les EPI, appliquer les gestes de sécurité">
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:1rem;">
+            <label>Clé API Anthropic (optionnel)</label>
+            <input type="password" id="api-key-c" placeholder="sk-ant-... — mode démo sans clé">
+          </div>
+          <div class="form-actions" style="border:none;padding-top:1rem;margin-top:0.5rem;">
+            <button class="btn btn-primary" id="btn-gen-chaud" onclick="generateFicheChaud()">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4.5H13l-3.8 2.8 1.5 4.5L7 10.1 3.3 12.8l1.5-4.5L1 5.5h4.5L7 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+              Générer la fiche à chaud
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="fiche-chaud-result" style="display:none;">
+        <div class="ai-result">
+          <div class="ai-result-header">
+            <div><div class="label">À distribuer en fin de séance</div><div class="title">Fiche d'évaluation à chaud</div></div>
+            <button class="btn btn-secondary btn-sm" onclick="window.print()">🖨 Imprimer</button>
+          </div>
+          <div class="ai-result-body" id="fiche-chaud-content"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAISIE RESULTATS -->
+    <div class="inner-panel" id="panel-saisie-chaud">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon">02</div>
+          <span class="section-title">Saisie des résultats collectés</span>
+        </div>
+        <div class="section-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Formation évaluée</label>
+              <input type="text" id="res-formation" placeholder="Intitulé de la formation">
+            </div>
+            <div class="form-group">
+              <label>Nombre de participants</label>
+              <input type="number" id="res-nb" value="12" min="1">
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="form-grid three" style="margin-bottom:1rem;">
+            <div class="form-group">
+              <label>Satisfaction globale moy. (/5)</label>
+              <input type="number" id="res-satis" min="1" max="5" step="0.1" placeholder="Ex : 4.2">
+            </div>
+            <div class="form-group">
+              <label>Pertinence du contenu (/5)</label>
+              <input type="number" id="res-pertinence" min="1" max="5" step="0.1" placeholder="Ex : 4.0">
+            </div>
+            <div class="form-group">
+              <label>Qualité du formateur (/5)</label>
+              <input type="number" id="res-formateur" min="1" max="5" step="0.1" placeholder="Ex : 4.5">
+            </div>
+            <div class="form-group">
+              <label>Applicabilité immédiate (/5)</label>
+              <input type="number" id="res-appli" min="1" max="5" step="0.1" placeholder="Ex : 3.8">
+            </div>
+            <div class="form-group">
+              <label>Score test de connaissances (%)</label>
+              <input type="number" id="res-score" min="0" max="100" placeholder="Ex : 78">
+            </div>
+            <div class="form-group">
+              <label>Taux de réussite (%)</label>
+              <input type="number" id="res-reussite" min="0" max="100" placeholder="Ex : 85">
+            </div>
+          </div>
+          <div class="form-group full">
+            <label>Points forts relevés par les participants</label>
+            <textarea id="res-points-forts" placeholder="Ex : Exemples concrets tirés du terrain, formateur disponible pour les questions..."></textarea>
+          </div>
+          <div class="form-group full" style="margin-top:0.8rem;">
+            <label>Axes d'amélioration suggérés</label>
+            <textarea id="res-amelio" placeholder="Ex : Durée trop courte, besoin d'exercices pratiques supplémentaires..."></textarea>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="saveResultatsChaud()">Enregistrer les résultats</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="resultats-chaud-display" style="display:none;">
+        <div class="section">
+          <div class="section-header">
+            <div class="section-icon" style="background:var(--valid);">✓</div>
+            <span class="section-title">Synthèse des résultats à chaud</span>
+          </div>
+          <div class="section-body" id="resultats-chaud-body"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB 2 — EVALUATION A FROID & IMPACT -->
+<!-- ============================================================ -->
+<div class="view" id="view-froid">
+
+  <div class="page-header" style="background:#0d1a1a;">
+    <div class="step-label">Module C — Évaluer · Étape 2/3</div>
+    <h1>Évaluation à froid<br><em>& mesure d'impact</em></h1>
+    <p>3 mois après la formation, le manager mesure le transfert des acquis en situation de travail et compare aux indicateurs initiaux.</p>
+  </div>
+
+  <div class="container">
+
+    <!-- FORMATION REF -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon">01</div>
+        <span class="section-title">Formation de référence</span>
+      </div>
+      <div class="section-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Formation évaluée <span class="req">*</span></label>
+            <input type="text" id="fr-formation" placeholder="Ex : Sécurité au travail — HSE Niveau 1">
+          </div>
+          <div class="form-group">
+            <label>Agent / Participant évalué</label>
+            <input type="text" id="fr-agent" placeholder="Prénom Nom">
+          </div>
+          <div class="form-group">
+            <label>Manager évaluateur</label>
+            <input type="text" id="fr-manager" placeholder="Prénom Nom — Fonction">
+          </div>
+          <div class="form-group">
+            <label>Délai post-formation</label>
+            <select id="fr-delai">
+              <option>3 mois</option>
+              <option>6 mois</option>
+              <option>1 an</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MESURE IMPACT POSTE -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon" style="background:var(--teal);">📊</div>
+        <span class="section-title">Mesure d'impact — Niveau poste</span>
+      </div>
+      <div class="section-body">
+        <p class="text-muted" style="margin-bottom:1.2rem;">Comparez les indicateurs saisis lors de la collecte des besoins (Module A) avec les valeurs observées aujourd'hui.</p>
+        <div class="impact-compare">
+          <div class="impact-box before">
+            <div class="label">Avant la formation</div>
+            <div class="form-group">
+              <label>Indicateur poste initial</label>
+              <input type="text" id="imp-poste-av" placeholder="Ex : Taux port EPI = 40%">
+            </div>
+          </div>
+          <div class="impact-arrow">→</div>
+          <div class="impact-box after">
+            <div class="label">Après la formation</div>
+            <div class="form-group">
+              <label>Indicateur poste observé</label>
+              <input type="text" id="imp-poste-ap" placeholder="Ex : Taux port EPI = 92%">
+            </div>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:0.8rem;">
+          <label>Appréciation du transfert — niveau poste</label>
+          <div class="likert" id="likert-poste">
+            <button class="likert-btn" onclick="setLikert('poste',1,this)">1 — Nul</button>
+            <button class="likert-btn" onclick="setLikert('poste',2,this)">2 — Insuffisant</button>
+            <button class="likert-btn" onclick="setLikert('poste',3,this)">3 — Partiel</button>
+            <button class="likert-btn" onclick="setLikert('poste',4,this)">4 — Satisfaisant</button>
+            <button class="likert-btn" onclick="setLikert('poste',5,this)">5 — Excellent</button>
+          </div>
+          <input type="hidden" id="likert-poste-val" value="">
+        </div>
+      </div>
+    </div>
+
+    <!-- MESURE IMPACT UNITE -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon" style="background:var(--accent);">📈</div>
+        <span class="section-title">Mesure d'impact — Niveau unité</span>
+      </div>
+      <div class="section-body">
+        <div class="impact-compare">
+          <div class="impact-box before">
+            <div class="label">Avant la formation</div>
+            <div class="form-group">
+              <label>Indicateur unité initial</label>
+              <input type="text" id="imp-unit-av" placeholder="Ex : 4 incidents/trimestre">
+            </div>
+          </div>
+          <div class="impact-arrow">→</div>
+          <div class="impact-box after">
+            <div class="label">Après la formation</div>
+            <div class="form-group">
+              <label>Indicateur unité observé</label>
+              <input type="text" id="imp-unit-ap" placeholder="Ex : 1 incident/trimestre">
+            </div>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:0.8rem;">
+          <label>Appréciation de l'impact — niveau unité</label>
+          <div class="likert" id="likert-unit">
+            <button class="likert-btn" onclick="setLikert('unit',1,this)">1 — Nul</button>
+            <button class="likert-btn" onclick="setLikert('unit',2,this)">2 — Insuffisant</button>
+            <button class="likert-btn" onclick="setLikert('unit',3,this)">3 — Partiel</button>
+            <button class="likert-btn" onclick="setLikert('unit',4,this)">4 — Satisfaisant</button>
+            <button class="likert-btn" onclick="setLikert('unit',5,this)">5 — Excellent</button>
+          </div>
+          <input type="hidden" id="likert-unit-val" value="">
+        </div>
+      </div>
+    </div>
+
+    <!-- OBSERVATIONS -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon">03</div>
+        <span class="section-title">Observations manager</span>
+      </div>
+      <div class="section-body">
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label>Comportements observés (transfert des acquis)</label>
+          <textarea id="fr-comportements" placeholder="Ex : Le collaborateur utilise systématiquement ses EPI depuis la formation. Il sensibilise aussi ses collègues..."></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label>Obstacles au transfert identifiés</label>
+          <textarea id="fr-obstacles" placeholder="Ex : Manque de temps pour appliquer les nouvelles méthodes, résistance d'une partie de l'équipe..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Recommandations (renforcement, complément de formation...)</label>
+          <textarea id="fr-recommandations" placeholder="Ex : Prévoir une session de rappel dans 6 mois, étendre la formation à l'équipe de nuit..."></textarea>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-secondary" onclick="generateFicheFroid()">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4.5H13l-3.8 2.8 1.5 4.5L7 10.1 3.3 12.8l1.5-4.5L1 5.5h4.5L7 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            Générer la fiche à froid
+          </button>
+          <button class="btn btn-primary" onclick="saveImpact()">Enregistrer l'évaluation d'impact</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="fiche-froid-result" style="display:none;">
+      <div class="ai-result">
+        <div class="ai-result-header">
+          <div><div class="label">Document de travail</div><div class="title">Fiche d'évaluation à froid & mesure d'impact</div></div>
+          <button class="btn btn-secondary btn-sm" onclick="window.print()">🖨 Imprimer</button>
+        </div>
+        <div class="ai-result-body" id="fiche-froid-content"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB 3 — RAPPORT ANNUEL -->
+<!-- ============================================================ -->
+<div class="view" id="view-rapport">
+
+  <div class="page-header" style="background:#1a0a1a;">
+    <div class="step-label">Module C — Évaluer · Étape 3/3</div>
+    <h1>Rapport annuel<br><em>de réalisation</em></h1>
+    <p>Synthèse complète du plan de formation : réalisations, taux d'atteinte des objectifs, mesure d'impact global, recommandations.</p>
+  </div>
+
+  <div class="container">
+
+    <!-- SYNTHESE IMPACTS -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon" style="background:var(--accent);">∑</div>
+        <span class="section-title">Données de réalisation</span>
+      </div>
+      <div class="section-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Entreprise</label>
+            <input type="text" id="rap-entreprise" placeholder="Nom de l'entreprise">
+          </div>
+          <div class="form-group">
+            <label>Année</label>
+            <input type="number" id="rap-annee" value="2025">
+          </div>
+          <div class="form-group">
+            <label>Auteur / RRH</label>
+            <input type="text" id="rap-auteur" placeholder="Prénom Nom">
+          </div>
+          <div class="form-group">
+            <label>Validateur DG</label>
+            <input type="text" id="rap-dg" placeholder="Directeur Général">
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="form-grid three">
+          <div class="form-group">
+            <label>Actions prévues</label>
+            <input type="number" id="rap-prevues" placeholder="Ex : 12">
+          </div>
+          <div class="form-group">
+            <label>Actions réalisées</label>
+            <input type="number" id="rap-realisees" placeholder="Ex : 10">
+          </div>
+          <div class="form-group">
+            <label>Participants formés</label>
+            <input type="number" id="rap-participants" placeholder="Ex : 87">
+          </div>
+          <div class="form-group">
+            <label>Budget prévu (DT)</label>
+            <input type="number" id="rap-budget-prevu" placeholder="Ex : 150000">
+          </div>
+          <div class="form-group">
+            <label>Budget consommé (DT)</label>
+            <input type="number" id="rap-budget-conso" placeholder="Ex : 132000">
+          </div>
+          <div class="form-group">
+            <label>Satisfaction moy. (/5)</label>
+            <input type="number" id="rap-satis" min="1" max="5" step="0.1" placeholder="Ex : 4.1">
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="form-group full" style="margin-bottom:1rem;">
+          <label>Principaux impacts mesurés (résumé)</label>
+          <textarea id="rap-impacts" placeholder="Ex : Réduction des incidents HSE de 75%, amélioration TRS de 12 points, 4 audits internes ISO conduits de façon autonome..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Contexte et observations générales</label>
+          <textarea id="rap-contexte" placeholder="Ex : Plan réalisé à 83% malgré les contraintes de production. Deux actions reportées à N+1..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- GENERATION -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon">✦</div>
+        <span class="section-title">Génération du rapport</span>
+      </div>
+      <div class="section-body">
+        <div class="form-group" style="max-width:480px;margin-bottom:1rem;">
+          <label>Clé API Anthropic (optionnel)</label>
+          <input type="password" id="api-key-c2" placeholder="sk-ant-... — mode démo sans clé">
+        </div>
+        <button class="btn btn-primary" id="btn-gen-rapport" onclick="generateRapport()">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4.5H13l-3.8 2.8 1.5 4.5L7 10.1 3.3 12.8l1.5-4.5L1 5.5h4.5L7 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          Générer le rapport annuel
+        </button>
+      </div>
+    </div>
+
+    <div id="rapport-result" style="display:none;">
+      <div class="stats-strip" id="rapport-stats">
+        <div class="stat-cell"><div class="stat-value" id="rs-taux">—</div><div class="stat-label">Taux de réalisation</div></div>
+        <div class="stat-cell"><div class="stat-value" id="rs-participants">—</div><div class="stat-label">Participants formés</div></div>
+        <div class="stat-cell"><div class="stat-value" id="rs-satis">—</div><div class="stat-label">Satisfaction moy.</div></div>
+        <div class="stat-cell"><div class="stat-value" id="rs-budget">—</div><div class="stat-label">Budget consommé</div></div>
+      </div>
+      <div class="ai-result">
+        <div class="ai-result-header">
+          <div><div class="label">Document officiel — à valider DG</div><div class="title">Rapport annuel de réalisation du plan de formation</div></div>
+          <div style="display:flex;gap:0.6rem;">
+            <button class="btn btn-secondary btn-sm" onclick="window.print()">🖨 Imprimer</button>
+          </div>
+        </div>
+        <div class="ai-result-body" id="rapport-content"></div>
+      </div>
+      <div class="export-bar">
+        <div><strong>Rapport prêt à soumettre</strong><p>À valider par la Direction Générale et les représentants du personnel avant diffusion.</p></div>
+        <div style="display:flex;gap:0.6rem;">
+          <button class="btn btn-secondary btn-sm" style="color:var(--cream);border-color:rgba(247,245,240,0.3);" onclick="showToast('Cycle complet — Retour au Module A pour N+1','info')">
+            ↺ Nouveau cycle N+1
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span id="toast-icon">✓</span>
+  <span id="toast-text">Action effectuée</span>
+</div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+const impactData = [];
+const resultatsChaud = [];
+const likertState = {};
+
+// ============================================================
+// NAV
+// ============================================================
+function showTab(tab) {
+  ['chaud','froid','rapport'].forEach(t => {
+    document.getElementById('view-' + t).classList.remove('active');
+  });
+  document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('view-' + tab).classList.add('active');
+  const idx = { chaud: 0, froid: 1, rapport: 2 };
+  document.querySelectorAll('.nav-tab')[idx[tab]].classList.add('active');
+}
+
+function switchInner(panelId, group) {
+  const viewEl = document.getElementById('view-' + group);
+  viewEl.querySelectorAll('.inner-panel').forEach(p => p.classList.remove('active'));
+  viewEl.querySelectorAll('.inner-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + panelId).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ============================================================
+// TOAST / LOADING
+// ============================================================
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-text').textContent = msg;
+  document.getElementById('toast-icon').textContent = type === 'success' ? '✓' : type === 'error' ? '✗' : 'ℹ';
+  t.className = 'toast show ' + type;
+  setTimeout(() => { t.className = 'toast'; }, 3500);
+}
+
+function setBtnLoading(id, loading, label = '') {
+  const btn = document.getElementById(id);
+  if (!btn) return;
+  btn.classList.toggle('btn-loading', loading);
+  if (loading) btn.innerHTML = '<div class="spinner"></div> Génération en cours…';
+  else if (label) btn.innerHTML = label;
+}
+
+// ============================================================
+// LIKERT
+// ============================================================
+function setLikert(group, val, btn) {
+  likertState[group] = val;
+  document.getElementById('likert-' + group + '-val').value = val;
+  document.querySelectorAll('#likert-' + group + ' .likert-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ============================================================
+// FICHE A CHAUD
+// ============================================================
+async function generateFicheChaud() {
+  const formation = document.getElementById('ch-formation').value || 'Formation';
+  const date = document.getElementById('ch-date').value;
+  const formateur = document.getElementById('ch-formateur').value;
+  const lieu = document.getElementById('ch-lieu').value;
+  const population = document.getElementById('ch-population').value;
+  const objectifs = document.getElementById('ch-objectifs').value;
+  const apiKey = document.getElementById('api-key-c').value.trim();
+  setBtnLoading('btn-gen-chaud', true);
+
+  const prompt = `Tu es expert en ingénierie pédagogique. Génère une fiche d'évaluation à chaud (réaction + acquis) professionnelle.
+
+Formation : ${formation}
+Date : ${date || 'à compléter'}
+Formateur : ${formateur || 'à compléter'}
+Lieu : ${lieu || 'à compléter'}
+Population : ${population || 'participants'}
+Objectifs : ${objectifs || 'à compléter'}
+
+La fiche doit inclure : en-tête, 5-6 questions de satisfaction (échelle 1-5), 3-4 questions sur les acquis, 2 questions ouvertes (points forts / axes d'amélioration), espace signature. Format clair, distribuable sur papier.`;
+
+  try {
+    let text = '';
+    if (apiKey) {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
+      });
+      const data = await res.json();
+      text = data.content?.[0]?.text || '';
+    } else {
+      await new Promise(r => setTimeout(r, 800));
+      text = `FICHE D'ÉVALUATION À CHAUD\n${formation}\n${date || '____/____/______'} — ${lieu || '____________'}\nFormateur : ${formateur || '________________________'}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nPARTIE 1 — SATISFACTION (entourer)\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n1. Satisfaction globale de la formation\n   1   2   3   4   5\n   (Très insatisfait)         (Très satisfait)\n\n2. Pertinence du contenu par rapport à mon poste\n   1   2   3   4   5\n\n3. Qualité pédagogique du formateur\n   1   2   3   4   5\n\n4. Clarté des explications et des supports\n   1   2   3   4   5\n\n5. Possibilité d'appliquer les acquis dans mon travail\n   1   2   3   4   5\n\n6. Conditions matérielles (salle, supports, timing)\n   1   2   3   4   5\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nPARTIE 2 — ÉVALUATION DES ACQUIS\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n7. Les objectifs annoncés ont-ils été atteints ?\n   □ Totalement   □ En grande partie   □ Partiellement   □ Pas du tout\n\n8. Citez 2 points clés que vous retenez de cette formation :\n   ___________________________________________________\n   ___________________________________________________\n\n9. Quel comportement allez-vous modifier dès demain ?\n   ___________________________________________________\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nPARTIE 3 — COMMENTAIRES LIBRES\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nPoints forts de cette formation :\n___________________________________________________\n\nSuggestions d'amélioration :\n___________________________________________________\n\nDate : ____________   Signature : ____________________\n⚠️ Anonymat garanti — Cette fiche est destinée à améliorer nos formations.`;
+    }
+    document.getElementById('fiche-chaud-content').innerHTML = '<pre>' + text + '</pre>';
+    document.getElementById('fiche-chaud-result').style.display = 'block';
+    showToast('Fiche à chaud générée');
+  } catch(err) { showToast('Erreur', 'error'); }
+  finally { setBtnLoading('btn-gen-chaud', false, '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4.5H13l-3.8 2.8 1.5 4.5L7 10.1 3.3 12.8l1.5-4.5L1 5.5h4.5L7 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg> Générer la fiche à chaud'); }
+}
+
+// ============================================================
+// SAVE RESULTATS CHAUD
+// ============================================================
+function saveResultatsChaud() {
+  const data = {
+    formation: document.getElementById('res-formation').value,
+    nb: document.getElementById('res-nb').value,
+    satis: parseFloat(document.getElementById('res-satis').value) || 0,
+    pertinence: parseFloat(document.getElementById('res-pertinence').value) || 0,
+    qualiteFormateur: parseFloat(document.getElementById('res-formateur').value) || 0,
+    applicabilite: parseFloat(document.getElementById('res-appli').value) || 0,
+    score: parseFloat(document.getElementById('res-score').value) || 0,
+    reussite: parseFloat(document.getElementById('res-reussite').value) || 0,
+    pointsForts: document.getElementById('res-points-forts').value,
+    amelio: document.getElementById('res-amelio').value,
+    savedAt: new Date().toLocaleString('fr-FR')
+  };
+  resultatsChaud.push(data);
+
+  const body = document.getElementById('resultats-chaud-body');
+  const makeGauge = (val, max, color) => `
+    <div class="gauge-wrap">
+      <div class="gauge-bar"><div class="gauge-fill" style="width:${(val/max)*100}%;background:${color};"></div></div>
+      <div class="gauge-label"><span>${val}</span><span>${max}</span></div>
+    </div>`;
+
+  body.innerHTML = `
+    <div class="form-grid three" style="margin-bottom:1.2rem;">
+      <div><div style="font-size:1.8rem;font-family:'DM Serif Display',serif;">${data.satis}/5</div><div class="text-muted">Satisfaction globale</div>${makeGauge(data.satis, 5, 'var(--accent)')}</div>
+      <div><div style="font-size:1.8rem;font-family:'DM Serif Display',serif;">${data.score}%</div><div class="text-muted">Score test acquis</div>${makeGauge(data.score, 100, 'var(--teal)')}</div>
+      <div><div style="font-size:1.8rem;font-family:'DM Serif Display',serif;">${data.reussite}%</div><div class="text-muted">Taux de réussite</div>${makeGauge(data.reussite, 100, 'var(--valid)')}</div>
+    </div>
+    ${data.pointsForts ? `<p style="font-size:0.85rem;margin-bottom:0.5rem;"><strong>Points forts :</strong> ${data.pointsForts}</p>` : ''}
+    ${data.amelio ? `<p style="font-size:0.85rem;"><strong>Axes d'amélioration :</strong> ${data.amelio}</p>` : ''}
+  `;
+  document.getElementById('resultats-chaud-display').style.display = 'block';
+  showToast('Résultats enregistrés');
+}
+
+// ============================================================
+// FICHE A FROID
+// ============================================================
+async function generateFicheFroid() {
+  const formation = document.getElementById('fr-formation').value || 'Formation';
+  const agent = document.getElementById('fr-agent').value;
+  const manager = document.getElementById('fr-manager').value;
+  const delai = document.getElementById('fr-delai').value;
+  const posteAv = document.getElementById('imp-poste-av').value;
+  const posteAp = document.getElementById('imp-poste-ap').value;
+  const unitAv = document.getElementById('imp-unit-av').value;
+  const unitAp = document.getElementById('imp-unit-ap').value;
+  const likertPoste = document.getElementById('likert-poste-val').value;
+  const likertUnit = document.getElementById('likert-unit-val').value;
+  const comportements = document.getElementById('fr-comportements').value;
+  const obstacles = document.getElementById('fr-obstacles').value;
+  const recommandations = document.getElementById('fr-recommandations').value;
+  const apiKey = document.getElementById('api-key-c').value.trim();
+
+  const prompt = `Tu es expert en évaluation de formation (modèle Kirkpatrick niveau 3-4). Génère une fiche d'évaluation à froid structurée.
+
+Formation : ${formation}
+Agent : ${agent}  |  Manager : ${manager}  |  Délai : ${delai}
+
+Mesure d'impact poste : Avant = "${posteAv}" / Après = "${posteAp}" — Score transfert : ${likertPoste}/5
+Mesure d'impact unité : Avant = "${unitAv}" / Après = "${unitAp}" — Score impact : ${likertUnit}/5
+
+Comportements observés : ${comportements || 'non renseigné'}
+Obstacles : ${obstacles || 'non identifiés'}
+Recommandations : ${recommandations || 'aucune'}
+
+Génère un document structuré avec synthèse du transfert, analyse de l'écart avant/après, conclusion sur l'atteinte des objectifs et recommandations actionnables.`;
+
+  try {
+    let text = '';
+    if (apiKey) {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
+      });
+      const data = await res.json();
+      text = data.content?.[0]?.text || '';
+    } else {
+      await new Promise(r => setTimeout(r, 900));
+      const impactScore = (parseInt(likertPoste) + parseInt(likertUnit)) / 2 || 3;
+      const impactLabel = impactScore >= 4 ? 'ATTEINT' : impactScore >= 3 ? 'PARTIELLEMENT ATTEINT' : 'NON ATTEINT';
+      text = `FICHE D'ÉVALUATION À FROID — MESURE D'IMPACT\n${formation}\nAgent : ${agent || '____'}  |  Manager : ${manager || '____'}  |  Délai post-formation : ${delai}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━\nMESURE D'IMPACT\n━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nNiveau poste (Kirkpatrick L3 — Comportement) :\n  Avant : ${posteAv || 'non renseigné'}\n  Après : ${posteAp || 'non renseigné'}\n  Score : ${likertPoste || '?'}/5\n\nNiveau unité (Kirkpatrick L4 — Résultats) :\n  Avant : ${unitAv || 'non renseigné'}\n  Après : ${unitAp || 'non renseigné'}\n  Score : ${likertUnit || '?'}/5\n\nStatut objectif : [ ${impactLabel} ]\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━\nSYNTHÈSE DU TRANSFERT\n━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nComportements observés : ${comportements || 'Non documentés'}\n\nObstacles identifiés : ${obstacles || 'Aucun obstacle majeur relevé'}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━\nRECOMMANDATIONS\n━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n${recommandations || 'Maintenir les acquis par une pratique régulière. Prévoir un point de suivi dans 3 mois.'}\n\nDate : ____________   Signature manager : ____________________`;
+    }
+    document.getElementById('fiche-froid-content').innerHTML = '<pre>' + text + '</pre>';
+    document.getElementById('fiche-froid-result').style.display = 'block';
+    showToast('Fiche à froid générée');
+  } catch(err) { showToast('Erreur', 'error'); }
+}
+
+function saveImpact() {
+  impactData.push({
+    formation: document.getElementById('fr-formation').value,
+    agent: document.getElementById('fr-agent').value,
+    posteAv: document.getElementById('imp-poste-av').value,
+    posteAp: document.getElementById('imp-poste-ap').value,
+    unitAv: document.getElementById('imp-unit-av').value,
+    unitAp: document.getElementById('imp-unit-ap').value,
+    likertPoste: document.getElementById('likert-poste-val').value,
+    likertUnit: document.getElementById('likert-unit-val').value,
+    savedAt: new Date().toLocaleString('fr-FR')
+  });
+  showToast('Évaluation d\'impact enregistrée');
+}
+
+// ============================================================
+// RAPPORT ANNUEL
+// ============================================================
+async function generateRapport() {
+  const entreprise = document.getElementById('rap-entreprise').value || 'L\'entreprise';
+  const annee = document.getElementById('rap-annee').value || '2025';
+  const auteur = document.getElementById('rap-auteur').value;
+  const dg = document.getElementById('rap-dg').value;
+  const prevues = parseInt(document.getElementById('rap-prevues').value) || 0;
+  const realisees = parseInt(document.getElementById('rap-realisees').value) || 0;
+  const participants = parseInt(document.getElementById('rap-participants').value) || 0;
+  const budgetPrevu = parseInt(document.getElementById('rap-budget-prevu').value) || 0;
+  const budgetConso = parseInt(document.getElementById('rap-budget-conso').value) || 0;
+  const satis = parseFloat(document.getElementById('rap-satis').value) || 0;
+  const impacts = document.getElementById('rap-impacts').value;
+  const contexte = document.getElementById('rap-contexte').value;
+  const apiKey = document.getElementById('api-key-c2').value.trim();
+
+  const taux = prevues > 0 ? Math.round((realisees / prevues) * 100) : 0;
+  const tauxBudget = budgetPrevu > 0 ? Math.round((budgetConso / budgetPrevu) * 100) : 0;
+
+  // UPDATE STATS
+  document.getElementById('rs-taux').textContent = taux + '%';
+  document.getElementById('rs-participants').textContent = participants;
+  document.getElementById('rs-satis').textContent = satis ? satis + '/5' : '—';
+  document.getElementById('rs-budget').textContent = budgetConso ? budgetConso.toLocaleString('fr-FR') + ' DT' : '—';
+
+  setBtnLoading('btn-gen-rapport', true);
+
+  const impactsData = impactData.length > 0
+    ? impactData.map(d => `- ${d.formation} : poste ${d.likertPoste}/5, unité ${d.likertUnit}/5`).join('\n')
+    : impacts || 'Non documentés';
+
+  const prompt = `Tu es expert en ingénierie de formation et reporting RH. Rédige un rapport annuel de réalisation du plan de formation.
+
+Entreprise : ${entreprise}
+Année : ${annee}
+Auteur : ${auteur || 'RRH'}
+Validateur : ${dg || 'Direction Générale'}
+
+DONNÉES DE RÉALISATION :
+- Actions prévues : ${prevues}  |  Actions réalisées : ${realisees}  (${taux}% de taux de réalisation)
+- Participants formés : ${participants}
+- Budget prévu : ${budgetPrevu.toLocaleString('fr-FR')} DT  |  Budget consommé : ${budgetConso.toLocaleString('fr-FR')} DT  (${tauxBudget}%)
+- Satisfaction moyenne : ${satis}/5
+
+MESURE D'IMPACT :
+${impactsData}
+
+CONTEXTE : ${contexte || 'Non précisé'}
+
+Rédige un rapport structuré (introduction, bilan quantitatif, bilan qualitatif, mesure d'impact, axes d'amélioration, recommandations pour N+1, conclusion). Ton professionnel et analytique.`;
+
+  try {
+    let text = '';
+    if (apiKey) {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1500, messages: [{ role: 'user', content: prompt }] })
+      });
+      const data = await res.json();
+      text = data.content?.[0]?.text || '';
+    } else {
+      await new Promise(r => setTimeout(r, 1200));
+      text = `RAPPORT ANNUEL DE RÉALISATION DU PLAN DE FORMATION\n${entreprise} — Exercice ${annee}\nAuteur : ${auteur || 'RRH'}  |  Validation : ${dg || 'Direction Générale'}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n1. INTRODUCTION\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nLe présent rapport synthétise la réalisation du plan de formation ${annee} de ${entreprise}. Il rend compte des actions engagées, des résultats obtenus et formule des recommandations pour l'exercice ${parseInt(annee)+1}.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n2. BILAN QUANTITATIF\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nActions de formation :\n  • Prévues    : ${prevues}\n  • Réalisées  : ${realisees}\n  • Taux de réalisation : ${taux}%\n\nParticipants :\n  • Formés     : ${participants}\n\nBudget formation :\n  • Prévu      : ${budgetPrevu.toLocaleString('fr-FR')} DT\n  • Consommé   : ${budgetConso.toLocaleString('fr-FR')} DT\n  • Taux d'utilisation : ${tauxBudget}%\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n3. BILAN QUALITATIF\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nSatisfaction participants : ${satis}/5\n${satis >= 4 ? 'Les formations ont été bien reçues. La pertinence du contenu et la qualité des intervenants ont été particulièrement appréciées.' : 'Des axes d\'amélioration ont été identifiés, notamment sur la pertinence du contenu et les conditions d\'organisation.'}\n\n${contexte ? 'Contexte : ' + contexte : ''}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n4. MESURE D'IMPACT\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n${impactsData}\n\nL'évaluation à froid (3 mois post-formation) confirme un transfert effectif des acquis dans la grande majorité des cas. Les indicateurs de performance ont évolué positivement sur les domaines prioritaires.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n5. RECOMMANDATIONS POUR ${parseInt(annee)+1}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n1. Reconduire les formations à fort impact (HSE, management opérationnel)\n2. Anticiper la planification : lancer la collecte des besoins en octobre\n3. Renforcer le suivi post-formation : généraliser l'évaluation à froid à 3 mois\n4. Optimiser le budget résiduel (${(budgetPrevu - budgetConso).toLocaleString('fr-FR')} DT) sur des actions de développement\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n6. CONCLUSION\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nLe plan de formation ${annee} a atteint ses objectifs principaux avec un taux de réalisation de ${taux}% et une satisfaction globale de ${satis}/5. La démarche de mesure d'impact introduite cette année constitue un progrès significatif dans le pilotage de la formation.\n\nFait à ____________, le ____________\n\nRRH : ${auteur || '________________________'}\nDG  : ${dg || '________________________'}`;
+    }
+    document.getElementById('rapport-content').innerHTML = '<pre>' + text + '</pre>';
+    document.getElementById('rapport-result').style.display = 'block';
+    document.getElementById('rapport-result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    showToast('Rapport annuel généré');
+  } catch(err) { showToast('Erreur', 'error'); }
+  finally { setBtnLoading('btn-gen-rapport', false, '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4.5H13l-3.8 2.8 1.5 4.5L7 10.1 3.3 12.8l1.5-4.5L1 5.5h4.5L7 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg> Générer le rapport annuel'); }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module B — Planifier & Déployer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --ink-light: #4a4a6a;
+    --ink-muted: #8888aa;
+    --cream: #f7f5f0;
+    --cream-dark: #ede9e1;
+    --accent: #2d6a6a;
+    --accent-light: #e0efef;
+    --accent-2: #c8523a;
+    --accent-2-light: #f0e4e0;
+    --gold: #b8860b;
+    --gold-light: #fdf6e0;
+    --valid: #2d6a4a;
+    --valid-light: #e0efea;
+    --border: #ddd8ce;
+    --shadow: 0 2px 12px rgba(26,26,46,0.08);
+    --shadow-lg: 0 8px 32px rgba(26,26,46,0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; }
+
+  /* NAV */
+  .nav {
+    background: var(--ink);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .nav-brand { font-family: 'DM Serif Display', serif; color: var(--cream); font-size: 1.1rem; }
+  .nav-brand span { color: var(--accent); }
+  .nav-module { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted); display: flex; gap: 1.5rem; }
+  .nav-module a { color: var(--ink-muted); text-decoration: none; transition: color 0.15s; }
+  .nav-module a:hover { color: var(--cream); }
+  .nav-tabs { display: flex; height: 100%; }
+  .nav-tab {
+    padding: 0 1.4rem; background: none; border: none; color: var(--ink-muted);
+    font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 500;
+    letter-spacing: 0.07em; text-transform: uppercase; cursor: pointer;
+    border-bottom: 2px solid transparent; transition: all 0.2s; height: 100%;
+  }
+  .nav-tab:hover { color: var(--cream); }
+  .nav-tab.active { color: var(--cream); border-bottom-color: var(--accent); }
+
+  /* VIEWS */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* PAGE HEADER */
+  .page-header {
+    background: #0d2626;
+    color: var(--cream);
+    padding: 3rem 2rem 2.5rem;
+    position: relative; overflow: hidden;
+  }
+  .page-header::before {
+    content: 'B';
+    position: absolute; right: 2rem; top: 50%; transform: translateY(-50%);
+    font-family: 'DM Serif Display', serif; font-size: 8rem;
+    color: rgba(255,255,255,0.04); line-height: 1; pointer-events: none;
+  }
+  .page-header .step-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.6rem; }
+  .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 2rem; line-height: 1.2; margin-bottom: 0.5rem; }
+  .page-header p { color: rgba(247,245,240,0.6); font-size: 0.9rem; max-width: 520px; }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 2.5rem 2rem; }
+
+  /* SECTION */
+  .section { background: white; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 1.5rem; box-shadow: var(--shadow); overflow: hidden; }
+  .section-header { padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.8rem; background: var(--cream); }
+  .section-icon { width: 32px; height: 32px; border-radius: 6px; background: var(--ink); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+  .section-title { font-size: 0.85rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink); }
+  .section-body { padding: 1.5rem; }
+
+  /* FORM */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+  .form-group.full { grid-column: 1 / -1; }
+  label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-light); }
+  label .req { color: var(--accent-2); margin-left: 2px; }
+  input, select, textarea {
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+    padding: 0.6rem 0.9rem; border: 1px solid var(--border); border-radius: 5px;
+    background: var(--cream); color: var(--ink); transition: border-color 0.15s, background 0.15s; outline: none; width: 100%;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); background: white; }
+  textarea { resize: vertical; min-height: 90px; }
+
+  /* UPLOAD ZONE */
+  .upload-zone {
+    border: 2px dashed var(--border); border-radius: 8px;
+    padding: 2rem; text-align: center; cursor: pointer;
+    transition: all 0.2s; background: var(--cream);
+  }
+  .upload-zone:hover { border-color: var(--accent); background: var(--accent-light); }
+  .upload-zone.active { border-color: var(--accent); background: var(--accent-light); }
+  .upload-zone .icon { font-size: 2rem; margin-bottom: 0.5rem; }
+  .upload-zone p { font-size: 0.85rem; color: var(--ink-muted); }
+  .upload-zone strong { color: var(--ink); }
+
+  /* TABS INSIDE */
+  .inner-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+  .inner-tab {
+    padding: 0.8rem 1.5rem; background: none; border: none; border-bottom: 2px solid transparent;
+    margin-bottom: -1px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600;
+    color: var(--ink-muted); cursor: pointer; transition: all 0.15s; letter-spacing: 0.03em;
+  }
+  .inner-tab:hover { color: var(--ink); }
+  .inner-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .inner-panel { display: none; }
+  .inner-panel.active { display: block; }
+
+  /* PLAN TABLE */
+  .plan-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .plan-table th { padding: 0.7rem 0.9rem; text-align: left; background: var(--ink); color: var(--cream); font-size: 0.68rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; }
+  .plan-table td { padding: 0.75rem 0.9rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .plan-table tr:last-child td { border-bottom: none; }
+  .plan-table tr:hover td { background: var(--cream); }
+  .plan-table td input { padding: 0.35rem 0.5rem; font-size: 0.82rem; }
+  .plan-table td select { padding: 0.35rem 0.5rem; font-size: 0.82rem; }
+
+  /* PRIORITY BADGE */
+  .prio-badge { display: inline-flex; align-items: center; justify-content: center; padding: 0.2rem 0.7rem; border-radius: 20px; font-size: 0.7rem; font-weight: 700; }
+  .prio-1 { background: var(--accent-2-light); color: var(--accent-2); }
+  .prio-2 { background: var(--gold-light); color: var(--gold); }
+  .prio-3 { background: var(--accent-light); color: var(--accent); }
+
+  /* SOURCE TAG */
+  .source-tag { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; color: white; }
+  .tag-a { background: var(--accent-2); }
+  .tag-b { background: #e07b30; }
+  .tag-c { background: var(--accent); }
+  .tag-d { background: #7b5ea7; }
+
+  /* STATS STRIP */
+  .stats-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 1.5rem; box-shadow: var(--shadow); }
+  .stat-cell { background: white; padding: 1rem 1.5rem; display: flex; flex-direction: column; gap: 0.25rem; }
+  .stat-value { font-family: 'DM Serif Display', serif; font-size: 1.8rem; color: var(--ink); line-height: 1; }
+  .stat-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-muted); }
+
+  /* BUTTONS */
+  .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: 5px; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; letter-spacing: 0.03em; }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #1d4f4f; }
+  .btn-secondary { background: white; color: var(--ink); border: 1.5px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--ink); }
+  .btn-sm { padding: 0.4rem 0.9rem; font-size: 0.78rem; }
+  .btn-loading { opacity: 0.7; pointer-events: none; }
+
+  /* SPINNER */
+  .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* AI RESULT BOX */
+  .ai-result {
+    border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+    box-shadow: var(--shadow); margin-top: 1.5rem;
+  }
+  .ai-result-header {
+    padding: 1rem 1.5rem; background: var(--ink); color: var(--cream);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .ai-result-header .label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(247,245,240,0.6); }
+  .ai-result-header .title { font-family: 'DM Serif Display', serif; font-size: 1.1rem; }
+  .ai-result-body { padding: 1.5rem; background: white; }
+  .ai-result-body pre { white-space: pre-wrap; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; line-height: 1.7; color: var(--ink); }
+
+  /* CALENDAR GRID */
+  .calendar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+  .calendar-quarter { border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+  .calendar-quarter-header { padding: 0.6rem 1rem; background: var(--ink); color: var(--cream); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+  .calendar-item { padding: 0.6rem 1rem; border-bottom: 1px solid var(--border); font-size: 0.78rem; }
+  .calendar-item:last-child { border-bottom: none; }
+  .calendar-item strong { display: block; color: var(--ink); margin-bottom: 0.1rem; }
+  .calendar-item span { color: var(--ink-muted); }
+
+  /* EMAIL PREVIEW */
+  .email-preview { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .email-header { padding: 1rem 1.5rem; background: var(--cream-dark); border-bottom: 1px solid var(--border); }
+  .email-field { display: flex; gap: 0.5rem; font-size: 0.82rem; margin-bottom: 0.3rem; }
+  .email-field:last-child { margin-bottom: 0; }
+  .email-field strong { color: var(--ink-muted); min-width: 60px; }
+  .email-body { padding: 1.5rem; background: white; font-size: 0.88rem; line-height: 1.7; white-space: pre-wrap; }
+
+  /* CDC */
+  .cdc-section { margin-bottom: 1.2rem; padding: 1rem; border: 1px solid var(--border); border-radius: 6px; background: var(--cream); }
+  .cdc-section h4 { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.6rem; }
+  .cdc-section p { font-size: 0.85rem; line-height: 1.65; color: var(--ink); }
+
+  /* FORM ACTIONS */
+  .form-actions { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; padding-top: 1.5rem; border-top: 1px solid var(--border); margin-top: 1.5rem; flex-wrap: wrap; }
+
+  /* EXPORT BAR */
+  .export-bar { background: var(--ink); border-radius: 8px; padding: 1.2rem 1.5rem; display: flex; align-items: center; justify-content: space-between; margin-top: 1.5rem; gap: 1rem; flex-wrap: wrap; }
+  .export-bar p { color: rgba(247,245,240,0.7); font-size: 0.82rem; }
+  .export-bar strong { color: var(--cream); }
+  .export-actions { display: flex; gap: 0.6rem; }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--ink); color: var(--cream); padding: 0.9rem 1.4rem; border-radius: 6px; font-size: 0.85rem; font-weight: 500; box-shadow: var(--shadow-lg); z-index: 999; transform: translateY(100px); opacity: 0; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); display: flex; align-items: center; gap: 0.6rem; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { border-left: 3px solid var(--valid); }
+  .toast.info { border-left: 3px solid var(--accent); }
+  .toast.error { border-left: 3px solid var(--accent-2); }
+
+  /* UTILS */
+  .text-muted { color: var(--ink-muted); font-size: 0.82rem; }
+  .warning-box { background: var(--gold-light); border: 1px solid #e8d080; border-radius: 6px; padding: 0.9rem 1.2rem; font-size: 0.82rem; color: var(--gold); display: flex; gap: 0.6rem; align-items: flex-start; }
+  .empty-state { text-align: center; padding: 3rem 2rem; color: var(--ink-muted); }
+  .empty-state .icon { font-size: 2.5rem; margin-bottom: 0.8rem; }
+  .divider { height: 1px; background: var(--border); margin: 1.2rem 0; }
+
+  @media (max-width: 640px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .stats-strip { grid-template-columns: 1fr 1fr; }
+    .calendar-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-brand" style="text-decoration:none;">Train<span>Sight</span> <span style="font-size:0.65rem;font-weight:600;letter-spacing:0.1em;color:var(--ink-muted);font-family:'DM Sans',sans-serif;">Light</span></a>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showTab('plan')">Plan de formation</button>
+    <button class="nav-tab" onclick="showTab('cdc')">Cahier des charges</button>
+    <button class="nav-tab" onclick="showTab('logistique')">Logistique</button>
+  </div>
+  <div style="display:flex;gap:0.3rem;align-items:center;">
+    <a href="module-a-collecte.html" style="padding:0.35rem 0.8rem;font-size:0.72rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-muted);text-decoration:none;border:1px solid rgba(255,255,255,0.1);border-radius:3px;transition:all 0.15s;" onmouseover="this.style.color='var(--cream)';this.style.borderColor='rgba(255,255,255,0.3)'" onmouseout="this.style.color='var(--ink-muted)';this.style.borderColor='rgba(255,255,255,0.1)'">← Module A</a>
+    <a href="module-c-evaluer.html" style="padding:0.35rem 0.8rem;font-size:0.72rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-muted);text-decoration:none;border:1px solid rgba(255,255,255,0.1);border-radius:3px;transition:all 0.15s;" onmouseover="this.style.color='var(--cream)';this.style.borderColor='rgba(255,255,255,0.3)'" onmouseout="this.style.color='var(--ink-muted)';this.style.borderColor='rgba(255,255,255,0.1)'">Module C →</a>
+  </div>
+</nav>
+
+<!-- ============================================================ -->
+<!-- TAB 1 — PLAN DE FORMATION -->
+<!-- ============================================================ -->
+<div class="view active" id="view-plan">
+
+  <div class="page-header">
+    <div class="step-label">Module B — Planifier · Étape 1/3</div>
+    <h1>Conception du plan<br><em>de formation</em></h1>
+    <p>Importez la grille consolidée du Module A, renseignez les paramètres et générez le plan de formation chiffré et priorisé.</p>
+  </div>
+
+  <div class="container">
+
+    <!-- IMPORT -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon">01</div>
+        <span class="section-title">Import des besoins (Module A)</span>
+      </div>
+      <div class="section-body">
+        <div style="display:flex;gap:1rem;align-items:flex-start;flex-wrap:wrap;">
+          <div style="flex:1;min-width:280px;">
+            <div class="upload-zone" id="upload-zone" onclick="document.getElementById('csv-input').click()">
+              <div class="icon">📥</div>
+              <p><strong>Importer le CSV du Module A</strong></p>
+              <p>Cliquez pour sélectionner le fichier exporté depuis la vue RH</p>
+            </div>
+            <input type="file" id="csv-input" accept=".csv" style="display:none" onchange="loadCSV(this)">
+          </div>
+          <div style="flex:1;min-width:280px;">
+            <div class="warning-box">
+              <span>💡</span>
+              <span>Vous pouvez aussi utiliser les <strong>données démo</strong> pour tester l'outil sans importer de fichier.</span>
+            </div>
+            <button class="btn btn-secondary btn-sm" style="margin-top:0.8rem;" onclick="loadDemoData()">
+              Charger les données démo
+            </button>
+          </div>
+        </div>
+
+        <div id="import-preview" style="margin-top:1.2rem;display:none;">
+          <div class="stats-strip">
+            <div class="stat-cell"><div class="stat-value" id="imp-total">0</div><div class="stat-label">Besoins importés</div></div>
+            <div class="stat-cell"><div class="stat-value" id="imp-p1">0</div><div class="stat-label">Priorité 1</div></div>
+            <div class="stat-cell"><div class="stat-value" id="imp-agents">0</div><div class="stat-label">Agents</div></div>
+            <div class="stat-cell"><div class="stat-value" id="imp-structs">0</div><div class="stat-label">Structures</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PARAMETRES -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon">02</div>
+        <span class="section-title">Paramètres de l'entreprise</span>
+      </div>
+      <div class="section-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nom de l'entreprise <span class="req">*</span></label>
+            <input type="text" id="p-entreprise" placeholder="Ex : Société Nationale X">
+          </div>
+          <div class="form-group">
+            <label>Secteur d'activité</label>
+            <input type="text" id="p-secteur" placeholder="Ex : Industrie manufacturière">
+          </div>
+          <div class="form-group">
+            <label>Année du plan <span class="req">*</span></label>
+            <input type="number" id="p-annee" value="2025" min="2024" max="2030">
+          </div>
+          <div class="form-group">
+            <label>Responsable formation</label>
+            <input type="text" id="p-rrh" placeholder="Nom du RRH / responsable">
+          </div>
+          <div class="form-group">
+            <label>Orientations stratégiques RH / DG</label>
+            <textarea id="p-orientations" placeholder="Ex : Montée en compétences techniques, préparation certification IATF, renforcement management intermédiaire..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Budget formation prévisionnel (DT)</label>
+            <input type="number" id="p-budget" placeholder="Ex : 150000">
+          </div>
+          <div class="form-group">
+            <label>Coût/jour formateur externe (DT)</label>
+            <input type="number" id="p-cout-ext" placeholder="Ex : 800">
+          </div>
+          <div class="form-group">
+            <label>Coût/jour formateur interne (DT)</label>
+            <input type="number" id="p-cout-int" placeholder="Ex : 200">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLEF API -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon">03</div>
+        <span class="section-title">Génération IA</span>
+      </div>
+      <div class="section-body">
+        <div class="form-group" style="max-width:480px;margin-bottom:1rem;">
+          <label>Clé API Anthropic</label>
+          <input type="password" id="api-key-b" placeholder="sk-ant-... (optionnel — mode démo sans clé)">
+        </div>
+        <button class="btn btn-primary" id="btn-generate-plan" onclick="generatePlan()">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4.5H13l-3.8 2.8 1.5 4.5L7 10.1 3.3 12.8l1.5-4.5L1 5.5h4.5L7 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          Générer le plan de formation
+        </button>
+      </div>
+    </div>
+
+    <!-- RÉSULTAT PLAN -->
+    <div id="plan-result" style="display:none;">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon" style="background:var(--valid);">✓</div>
+          <span class="section-title">Plan de formation généré</span>
+          <span style="margin-left:auto;" class="text-muted" id="plan-meta"></span>
+        </div>
+        <div class="section-body" style="padding:0;overflow-x:auto;">
+          <table class="plan-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Action de formation</th>
+                <th>Population</th>
+                <th>Type</th>
+                <th>Durée (j)</th>
+                <th>Budget (DT)</th>
+                <th>Priorité</th>
+                <th>Période</th>
+                <th>Source</th>
+              </tr>
+            </thead>
+            <tbody id="plan-tbody"></tbody>
+          </table>
+        </div>
+        <div style="padding:1rem 1.5rem;border-top:1px solid var(--border);background:var(--cream);display:flex;gap:2rem;flex-wrap:wrap;">
+          <div><span class="text-muted">Budget total estimé :</span> <strong id="plan-total-budget">—</strong></div>
+          <div><span class="text-muted">Durée totale :</span> <strong id="plan-total-jours">—</strong></div>
+          <div style="margin-left:auto;display:flex;gap:0.6rem;">
+            <button class="btn btn-secondary btn-sm" onclick="exportPlanCSV()">Export CSV</button>
+            <button class="btn btn-primary btn-sm" onclick="showTab('cdc');setTimeout(()=>autoFillCDC(),200)">
+              Continuer → Cahier des charges
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB 2 — CAHIER DES CHARGES -->
+<!-- ============================================================ -->
+<div class="view" id="view-cdc">
+
+  <div class="page-header" style="background:#0d2020;">
+    <div class="step-label">Module B — Planifier · Étape 2/3</div>
+    <h1>Cahier des charges<br><em>& sélection prestataires</em></h1>
+    <p>Générez le cahier des charges par lot d'actions et la grille d'évaluation des bureaux de formation.</p>
+  </div>
+
+  <div class="container">
+
+    <div class="inner-tabs">
+      <button class="inner-tab active" onclick="switchInner('cdc-gen','cdc')">Génération CDC</button>
+      <button class="inner-tab" onclick="switchInner('cdc-eval','cdc')">Analyse des offres</button>
+    </div>
+
+    <!-- CDC GEN -->
+    <div class="inner-panel active" id="panel-cdc-gen">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon">01</div>
+          <span class="section-title">Paramètres du cahier des charges</span>
+        </div>
+        <div class="section-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Entreprise commanditaire</label>
+              <input type="text" id="cdc-entreprise" placeholder="Repris du plan...">
+            </div>
+            <div class="form-group">
+              <label>Date limite de réponse</label>
+              <input type="date" id="cdc-deadline">
+            </div>
+            <div class="form-group">
+              <label>Contact RH (nom + email)</label>
+              <input type="text" id="cdc-contact" placeholder="Nom — email@entreprise.tn">
+            </div>
+            <div class="form-group">
+              <label>Lot de formation ciblé</label>
+              <input type="text" id="cdc-lot" placeholder="Ex : Sécurité & HSE, ou tous les lots">
+            </div>
+            <div class="form-group full">
+              <label>Exigences spécifiques</label>
+              <textarea id="cdc-exigences" placeholder="Ex : Formateur certifié, sessions intra-entreprise, support en arabe..."></textarea>
+            </div>
+          </div>
+          <div class="form-actions" style="border:none;padding-top:1rem;margin-top:0;">
+            <div></div>
+            <button class="btn btn-primary" id="btn-gen-cdc" onclick="generateCDC()">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4.5H13l-3.8 2.8 1.5 4.5L7 10.1 3.3 12.8l1.5-4.5L1 5.5h4.5L7 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+              Générer le cahier des charges
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="cdc-result" style="display:none;">
+        <div class="ai-result">
+          <div class="ai-result-header">
+            <div>
+              <div class="label">Document de travail</div>
+              <div class="title">Cahier des charges — Formation</div>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="printSection('cdc-result')">🖨 Imprimer</button>
+          </div>
+          <div class="ai-result-body" id="cdc-content"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ANALYSE OFFRES -->
+    <div class="inner-panel" id="panel-cdc-eval">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon">02</div>
+          <span class="section-title">Analyse des offres prestataires</span>
+        </div>
+        <div class="section-body">
+          <div class="form-group" style="margin-bottom:1rem;">
+            <label>Offres reçues (coller le texte, séparées par ---)</label>
+            <textarea id="offres-text" style="min-height:150px;" placeholder="Coller ici le texte des offres reçues des bureaux de formation. Séparez chaque offre par une ligne ---"></textarea>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Nombre de prestataires consultés</label>
+              <input type="number" id="nb-prestataires" value="3" min="1" max="10">
+            </div>
+            <div class="form-group">
+              <label>Budget disponible pour ce lot (DT)</label>
+              <input type="number" id="budget-lot" placeholder="Ex : 30000">
+            </div>
+          </div>
+          <div class="form-actions" style="border:none;padding-top:1rem;margin-top:0;">
+            <div></div>
+            <button class="btn btn-primary" id="btn-analyze-offres" onclick="analyzeOffres()">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4.5H13l-3.8 2.8 1.5 4.5L7 10.1 3.3 12.8l1.5-4.5L1 5.5h4.5L7 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+              Analyser et comparer les offres
+            </button>
+          </div>
+        </div>
+      </div>
+      <div id="offres-result" style="display:none;">
+        <div class="ai-result">
+          <div class="ai-result-header">
+            <div><div class="label">Analyse comparative</div><div class="title">Grille d'évaluation des prestataires</div></div>
+          </div>
+          <div class="ai-result-body" id="offres-content"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB 3 — LOGISTIQUE -->
+<!-- ============================================================ -->
+<div class="view" id="view-logistique">
+
+  <div class="page-header" style="background:#1a1a0a;">
+    <div class="step-label">Module B — Planifier · Étape 3/3</div>
+    <h1>Logistique<br><em>& communication</em></h1>
+    <p>Calendrier prévisionnel, répartition des groupes et courriels d'invitation aux participants.</p>
+  </div>
+
+  <div class="container">
+
+    <div class="inner-tabs">
+      <button class="inner-tab active" onclick="switchInner('log-cal','log')">Calendrier & Groupes</button>
+      <button class="inner-tab" onclick="switchInner('log-email','log')">Courriels d'invitation</button>
+    </div>
+
+    <!-- CALENDRIER -->
+    <div class="inner-panel active" id="panel-log-cal">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon">01</div>
+          <span class="section-title">Paramètres logistiques</span>
+        </div>
+        <div class="section-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Date de début du plan</label>
+              <input type="date" id="log-debut">
+            </div>
+            <div class="form-group">
+              <label>Lieu principal des formations</label>
+              <input type="text" id="log-lieu" placeholder="Ex : Siège social — Salle B2">
+            </div>
+            <div class="form-group">
+              <label>Taille maximale par groupe</label>
+              <input type="number" id="log-groupe" value="15" min="5" max="50">
+            </div>
+            <div class="form-group">
+              <label>Contraintes à respecter</label>
+              <input type="text" id="log-contraintes" placeholder="Ex : Pas de formation en août, pas le vendredi PM">
+            </div>
+          </div>
+          <div class="form-actions" style="border:none;padding-top:1rem;margin-top:0;">
+            <div></div>
+            <button class="btn btn-primary" id="btn-gen-cal" onclick="generateCalendar()">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4.5H13l-3.8 2.8 1.5 4.5L7 10.1 3.3 12.8l1.5-4.5L1 5.5h4.5L7 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+              Générer le calendrier
+            </button>
+          </div>
+        </div>
+      </div>
+      <div id="cal-result" style="display:none;">
+        <div class="ai-result">
+          <div class="ai-result-header">
+            <div><div class="label">Document de travail</div><div class="title">Calendrier prévisionnel de formation</div></div>
+            <button class="btn btn-secondary btn-sm" onclick="printSection('cal-result')">🖨 Imprimer</button>
+          </div>
+          <div class="ai-result-body" id="cal-content"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAILS -->
+    <div class="inner-panel" id="panel-log-email">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon">02</div>
+          <span class="section-title">Génération des courriels d'invitation</span>
+        </div>
+        <div class="section-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Formation concernée</label>
+              <input type="text" id="email-formation" placeholder="Ex : Sécurité au travail — HSE Niveau 1">
+            </div>
+            <div class="form-group">
+              <label>Date et lieu</label>
+              <input type="text" id="email-date" placeholder="Ex : 15–16 mars 2025 — Salle B2">
+            </div>
+            <div class="form-group">
+              <label>Formateur / Cabinet</label>
+              <input type="text" id="email-formateur" placeholder="Ex : Cabinet Formation Pro">
+            </div>
+            <div class="form-group">
+              <label>Signataire du courriel</label>
+              <input type="text" id="email-signataire" placeholder="Nom — Fonction">
+            </div>
+            <div class="form-group full">
+              <label>Liste des participants (un par ligne)</label>
+              <textarea id="email-participants" placeholder="Mohamed Ben Ali — m.benali@entreprise.tn&#10;Sana Mejri — s.mejri@entreprise.tn"></textarea>
+            </div>
+          </div>
+          <div class="form-actions" style="border:none;padding-top:1rem;margin-top:0;">
+            <div></div>
+            <button class="btn btn-primary" id="btn-gen-email" onclick="generateEmail()">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4.5H13l-3.8 2.8 1.5 4.5L7 10.1 3.3 12.8l1.5-4.5L1 5.5h4.5L7 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+              Générer les courriels
+            </button>
+          </div>
+        </div>
+      </div>
+      <div id="email-result" style="display:none;">
+        <div class="ai-result">
+          <div class="ai-result-header">
+            <div><div class="label">Modèle de courriel</div><div class="title">Invitation à la formation</div></div>
+            <button class="btn btn-secondary btn-sm" onclick="copyEmail()">⎘ Copier</button>
+          </div>
+          <div class="ai-result-body" id="email-content"></div>
+        </div>
+        <div class="export-bar" style="margin-top:1rem;">
+          <div><strong>Prêt pour le Module C</strong><p>Une fois les formations réalisées, passez à l'évaluation et la mesure d'impact.</p></div>
+          <button class="btn btn-primary btn-sm" onclick="showToast('Transfert vers Module C — fonctionnalité bientôt disponible','info')">Continuer → Module C</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span id="toast-icon">✓</span>
+  <span id="toast-text">Action effectuée</span>
+</div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+let planData = [];
+let importedBesoins = [];
+
+// ============================================================
+// NAV
+// ============================================================
+function showTab(tab) {
+  ['plan','cdc','logistique'].forEach(t => {
+    document.getElementById('view-' + t).classList.remove('active');
+  });
+  document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('view-' + tab).classList.add('active');
+  const idx = { plan: 0, cdc: 1, logistique: 2 };
+  document.querySelectorAll('.nav-tab')[idx[tab]].classList.add('active');
+}
+
+function switchInner(panelId, group) {
+  document.querySelectorAll(`#view-${group === 'cdc' ? 'cdc' : 'logistique'} .inner-panel`).forEach(p => p.classList.remove('active'));
+  document.querySelectorAll(`#view-${group === 'cdc' ? 'cdc' : 'logistique'} .inner-tab`).forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + panelId).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-text').textContent = msg;
+  document.getElementById('toast-icon').textContent = type === 'success' ? '✓' : type === 'error' ? '✗' : 'ℹ';
+  t.className = 'toast show ' + type;
+  setTimeout(() => { t.className = 'toast'; }, 3500);
+}
+
+function setBtnLoading(id, loading, label = '') {
+  const btn = document.getElementById(id);
+  if (!btn) return;
+  if (loading) {
+    btn.classList.add('btn-loading');
+    btn.innerHTML = '<div class="spinner"></div> Génération en cours…';
+  } else {
+    btn.classList.remove('btn-loading');
+    if (label) btn.innerHTML = label;
+  }
+}
+
+// ============================================================
+// DEMO DATA
+// ============================================================
+function loadDemoData() {
+  importedBesoins = [
+    { Agent: 'Mohamed Ben Ali', Poste: 'Technicien maintenance', Structure: 'Production — Unité 1', Theme: 'Sécurité au travail et EPI', Source: 'B', Competences: 'Maîtriser les EPI et gestes de sécurité', Ind_Poste_Avant: 'Taux port EPI 40%', Ind_Poste_Apres: 'Taux port EPI ≥ 90%', Ind_Unite_Avant: '4 incidents/trim.', Ind_Unite_Apres: '0 incident/trim.', Priorite: '1', Periode: 'T1' },
+    { Agent: 'Sana Mejri', Poste: 'Responsable qualité', Structure: 'Qualité', Theme: 'ISO 9001:2015 — Audit interne', Source: 'A', Competences: 'Conduire des audits internes qualité', Ind_Poste_Avant: '0 audit réalisé', Ind_Poste_Apres: '4 audits/an autonomes', Ind_Unite_Avant: 'NC récurrentes x8/trim.', Ind_Unite_Apres: 'NC ≤ 2/trim.', Priorite: '1', Periode: 'T1' },
+    { Agent: 'Riadh Chaabane', Poste: 'Chef d\'équipe', Structure: 'Production — Unité 2', Theme: 'Management opérationnel et leadership', Source: 'C', Competences: 'Animer et motiver une équipe terrain', Ind_Poste_Avant: 'Score leadership 3/10', Ind_Poste_Apres: 'Score leadership ≥ 7/10', Ind_Unite_Avant: 'Absentéisme 12%', Ind_Unite_Apres: 'Absentéisme ≤ 6%', Priorite: '2', Periode: 'T2' },
+    { Agent: 'Amira Trabelsi', Poste: 'Comptable', Structure: 'Finance & Admin', Theme: 'Maîtrise d\'Excel avancé et tableaux de bord', Source: 'D', Competences: 'Créer des tableaux de bord RH et financiers', Ind_Poste_Avant: 'Traitement manuel 4h/semaine', Ind_Poste_Apres: 'Traitement automatisé < 30 min', Ind_Unite_Avant: 'Rapports DG retardés x3/mois', Ind_Unite_Apres: '0 rapport en retard', Priorite: '2', Periode: 'T2' },
+    { Agent: 'Karim Nasri', Poste: 'Ingénieur process', Structure: 'R&D', Theme: 'Lean Manufacturing et amélioration continue', Source: 'A', Competences: 'Déployer des chantiers Kaizen', Ind_Poste_Avant: '0 chantier mené', Ind_Poste_Apres: '2 chantiers Kaizen/an', Ind_Unite_Avant: 'TRS machine 62%', Ind_Unite_Apres: 'TRS machine ≥ 75%', Priorite: '1', Periode: 'T1' },
+  ];
+  updateImportPreview();
+  showToast('Données démo chargées — 5 besoins');
+}
+
+function updateImportPreview() {
+  document.getElementById('import-preview').style.display = 'block';
+  document.getElementById('imp-total').textContent = importedBesoins.length;
+  document.getElementById('imp-p1').textContent = importedBesoins.filter(b => b.Priorite == '1').length;
+  document.getElementById('imp-agents').textContent = [...new Set(importedBesoins.map(b => b.Agent))].length;
+  document.getElementById('imp-structs').textContent = [...new Set(importedBesoins.map(b => b.Structure))].length;
+}
+
+// ============================================================
+// CSV IMPORT
+// ============================================================
+function loadCSV(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const text = e.target.result;
+    const lines = text.split('\n').filter(l => l.trim());
+    const headers = lines[0].split(';').map(h => h.replace(/"/g,'').trim());
+    importedBesoins = lines.slice(1).map(line => {
+      const vals = line.split(';').map(v => v.replace(/^"|"$/g,'').trim());
+      const obj = {};
+      headers.forEach((h, i) => obj[h] = vals[i] || '');
+      return obj;
+    }).filter(b => b.Theme);
+    updateImportPreview();
+    showToast(`${importedBesoins.length} besoins importés`);
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+// ============================================================
+// GENERATE PLAN
+// ============================================================
+async function generatePlan() {
+  if (importedBesoins.length === 0) { showToast('Importez d\'abord les besoins du Module A', 'info'); return; }
+  const entreprise = document.getElementById('p-entreprise').value || 'L\'entreprise';
+  const annee = document.getElementById('p-annee').value || '2025';
+  const orientations = document.getElementById('p-orientations').value || '';
+  const budget = document.getElementById('p-budget').value || 'non défini';
+  const coutExt = document.getElementById('p-cout-ext').value || '800';
+  const coutInt = document.getElementById('p-cout-int').value || '200';
+  const apiKey = document.getElementById('api-key-b').value.trim();
+
+  setBtnLoading('btn-generate-plan', true);
+
+  const prompt = `Tu es expert en ingénierie de la formation. Génère un plan de formation structuré pour ${entreprise}, année ${annee}.
+
+BESOINS IDENTIFIÉS (${importedBesoins.length} besoins validés) :
+${importedBesoins.map((b, i) => `${i+1}. Thème: ${b.Theme} | Source: ${b.Source} | Population: ${b.Agent} (${b.Poste}) | Priorité: ${b.Priorite} | Période: ${b.Periode}`).join('\n')}
+
+ORIENTATIONS STRATÉGIQUES : ${orientations || 'Non précisées'}
+BUDGET PRÉVISIONNEL : ${budget} DT
+COÛT FORMATEUR EXTERNE : ${coutExt} DT/jour | INTERNE : ${coutInt} DT/jour
+
+Génère un tableau JSON UNIQUEMENT (pas de texte avant ou après) avec ce format exact :
+[{"id":"1","action":"intitulé","population":"qui","type":"Interne/Externe","duree":2,"budget":1600,"priorite":1,"periode":"T1","source":"B","justification":"pourquoi"}]
+
+Regroupe les besoins similaires en une seule action si pertinent. Estime la durée et le budget de façon réaliste. Maximum 12 actions.`;
+
+  try {
+    if (apiKey) {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 2000, messages: [{ role: 'user', content: prompt }] })
+      });
+      const data = await res.json();
+      const text = data.content?.[0]?.text || '';
+      const jsonMatch = text.match(/\[[\s\S]*\]/);
+      if (jsonMatch) { planData = JSON.parse(jsonMatch[0]); renderPlan(); }
+      else { throw new Error('Format inattendu'); }
+    } else {
+      await new Promise(r => setTimeout(r, 1200));
+      planData = importedBesoins.map((b, i) => ({
+        id: String(i + 1),
+        action: b.Theme,
+        population: b.Agent + ' + équipe ' + b.Structure,
+        type: ['A','B'].includes(b.Source) ? 'Externe' : 'Interne',
+        duree: b.Priorite == '1' ? 2 : 1,
+        budget: b.Priorite == '1' ? parseInt(coutExt) * 2 : parseInt(coutExt),
+        priorite: parseInt(b.Priorite) || 2,
+        periode: b.Periode || 'T2',
+        source: b.Source,
+        justification: b.Competences
+      }));
+      renderPlan();
+    }
+  } catch(err) {
+    showToast('Erreur lors de la génération', 'error');
+  } finally {
+    setBtnLoading('btn-generate-plan', false, '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4.5H13l-3.8 2.8 1.5 4.5L7 10.1 3.3 12.8l1.5-4.5L1 5.5h4.5L7 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg> Générer le plan de formation');
+  }
+}
+
+function renderPlan() {
+  const tbody = document.getElementById('plan-tbody');
+  const prioLabels = { 1: 'Prioritaire', 2: 'Nécessaire', 3: 'Utile' };
+  tbody.innerHTML = planData.map(row => `
+    <tr>
+      <td><strong>${row.id}</strong></td>
+      <td><strong>${row.action}</strong><br><span class="text-muted">${row.justification || ''}</span></td>
+      <td>${row.population}</td>
+      <td><span style="font-size:0.78rem;">${row.type}</span></td>
+      <td><input type="number" value="${row.duree}" min="0.5" step="0.5" style="width:60px;" onchange="updatePlanRow('${row.id}','duree',this.value)"></td>
+      <td><input type="number" value="${row.budget}" style="width:90px;" onchange="updatePlanRow('${row.id}','budget',this.value)"></td>
+      <td><span class="prio-badge prio-${row.priorite}">${prioLabels[row.priorite] || 'P' + row.priorite}</span></td>
+      <td><select style="width:90px;" onchange="updatePlanRow('${row.id}','periode',this.value)">
+        <option ${row.periode=='T1'?'selected':''}>T1</option>
+        <option ${row.periode=='T2'?'selected':''}>T2</option>
+        <option ${row.periode=='T3'?'selected':''}>T3</option>
+        <option ${row.periode=='T4'?'selected':''}>T4</option>
+      </select></td>
+      <td><span class="source-tag tag-${(row.source||'a').toLowerCase()}">${row.source || '?'}</span></td>
+    </tr>
+  `).join('');
+  const totalBudget = planData.reduce((s, r) => s + (parseFloat(r.budget) || 0), 0);
+  const totalJours = planData.reduce((s, r) => s + (parseFloat(r.duree) || 0), 0);
+  document.getElementById('plan-total-budget').textContent = totalBudget.toLocaleString('fr-FR') + ' DT';
+  document.getElementById('plan-total-jours').textContent = totalJours + ' jours';
+  document.getElementById('plan-meta').textContent = planData.length + ' actions de formation';
+  document.getElementById('plan-result').style.display = 'block';
+  document.getElementById('plan-result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  showToast('Plan de formation généré');
+}
+
+function updatePlanRow(id, field, value) {
+  const row = planData.find(r => r.id === id);
+  if (row) row[field] = isNaN(value) ? value : parseFloat(value);
+}
+
+function autoFillCDC() {
+  const entreprise = document.getElementById('p-entreprise').value;
+  if (entreprise) document.getElementById('cdc-entreprise').value = entreprise;
+}
+
+// ============================================================
+// GENERATE CDC
+// ============================================================
+async function generateCDC() {
+  const entreprise = document.getElementById('cdc-entreprise').value || 'L\'entreprise';
+  const deadline = document.getElementById('cdc-deadline').value;
+  const contact = document.getElementById('cdc-contact').value;
+  const lot = document.getElementById('cdc-lot').value || 'toutes les actions';
+  const exigences = document.getElementById('cdc-exigences').value;
+  const apiKey = document.getElementById('api-key-b').value.trim();
+
+  setBtnLoading('btn-gen-cdc', true);
+
+  const actionsResume = planData.length > 0
+    ? planData.map(p => `- ${p.action} (${p.duree}j, ${p.budget} DT, ${p.periode})`).join('\n')
+    : '- Actions du plan de formation';
+
+  const prompt = `Tu es expert en ingénierie de formation. Rédige un cahier des charges professionnel pour appel d'offres formation.
+
+Entreprise : ${entreprise}
+Lot ciblé : ${lot}
+Date limite de réponse : ${deadline || 'à définir'}
+Contact RH : ${contact || 'à compléter'}
+Exigences : ${exigences || 'standard'}
+
+Actions concernées :
+${actionsResume}
+
+Rédige un CDC structuré avec ces sections : 1. Présentation de l'entreprise 2. Objet de l'appel d'offres 3. Description des actions de formation 4. Profil du formateur requis 5. Modalités pédagogiques 6. Livrables attendus 7. Critères d'évaluation 8. Modalités de réponse. Ton professionnel, format document.`;
+
+  try {
+    let text = '';
+    if (apiKey) {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1500, messages: [{ role: 'user', content: prompt }] })
+      });
+      const data = await res.json();
+      text = data.content?.[0]?.text || '';
+    } else {
+      await new Promise(r => setTimeout(r, 1000));
+      text = `CAHIER DES CHARGES — APPEL D'OFFRES FORMATION\n${entreprise} — Année ${document.getElementById('p-annee')?.value || '2025'}\n\n1. PRÉSENTATION DE L'ENTREPRISE\n${entreprise} est une entreprise dont les activités nécessitent le développement continu des compétences de son personnel. Dans le cadre de son plan de formation annuel, elle lance le présent appel d'offres.\n\n2. OBJET DE L'APPEL D'OFFRES\nAcquisition de prestations de formation pour le lot : ${lot}.\n\n3. ACTIONS DE FORMATION\n${actionsResume}\n\n4. PROFIL DU FORMATEUR\n- Expérience minimum 5 ans dans le domaine\n- Références vérifiables dans des entreprises similaires\n- Capacité à adapter le contenu au contexte de l'entreprise\n${exigences ? '- ' + exigences : ''}\n\n5. MODALITÉS PÉDAGOGIQUES\n- Formation intra-entreprise, en présentiel\n- Support de cours remis aux participants\n- Méthodes actives : études de cas, mises en situation\n- Évaluation des acquis en fin de session\n\n6. LIVRABLES ATTENDUS\n- Programme détaillé avant la formation\n- Support pédagogique (PDF/PPT)\n- Feuilles de présence signées\n- Rapport de formation post-action\n\n7. CRITÈRES D'ÉVALUATION\n- Adéquation du profil formateur : 30%\n- Qualité du programme proposé : 35%\n- Rapport qualité/prix : 25%\n- Références dans le secteur : 10%\n\n8. MODALITÉS DE RÉPONSE\nTransmettre votre offre technique et financière avant le ${deadline || '[date limite]'} à : ${contact || '[contact RH]'}`;
+    }
+    document.getElementById('cdc-content').innerHTML = '<pre>' + text + '</pre>';
+    document.getElementById('cdc-result').style.display = 'block';
+    showToast('Cahier des charges généré');
+  } catch(err) {
+    showToast('Erreur lors de la génération', 'error');
+  } finally {
+    setBtnLoading('btn-gen-cdc', false, '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4.5H13l-3.8 2.8 1.5 4.5L7 10.1 3.3 12.8l1.5-4.5L1 5.5h4.5L7 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg> Générer le cahier des charges');
+  }
+}
+
+// ============================================================
+// ANALYSE OFFRES
+// ============================================================
+async function analyzeOffres() {
+  const offres = document.getElementById('offres-text').value.trim();
+  if (!offres) { showToast('Collez les offres à analyser', 'info'); return; }
+  const nb = document.getElementById('nb-prestataires').value;
+  const budget = document.getElementById('budget-lot').value;
+  const apiKey = document.getElementById('api-key-b').value.trim();
+  setBtnLoading('btn-analyze-offres', true);
+
+  const prompt = `Tu es expert en achat de formation. Analyse ces ${nb} offres de prestataires et produis une grille comparative.
+
+Budget disponible : ${budget || 'non précisé'} DT
+
+OFFRES :
+${offres}
+
+Produis : 1. Tableau comparatif (prestataire, prix, durée, points forts, points faibles) 2. Recommandation motivée avec prestataire conseillé 3. Points de négociation suggérés.`;
+
+  try {
+    let text = '';
+    if (apiKey) {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1200, messages: [{ role: 'user', content: prompt }] })
+      });
+      const data = await res.json();
+      text = data.content?.[0]?.text || '';
+    } else {
+      await new Promise(r => setTimeout(r, 900));
+      text = `ANALYSE COMPARATIVE DES OFFRES\n\nTableau comparatif :\nPrestataire A : offre complète, profil formateur senior, prix dans le budget — RECOMMANDÉ\nPrestataire B : offre moins détaillée, prix légèrement supérieur, références limitées\nPrestataire C : prix le plus bas, mais contenu standard sans personnalisation\n\nRecommandation : Prestataire A — meilleur rapport qualité/prix, expérience sectorielle, programme personnalisable.\n\nPoints de négociation : demander 2 sessions de 2h post-formation (suivi 3 mois), inclure le support numérique dans le prix, prévoir une clause de satisfaction.`;
+    }
+    document.getElementById('offres-content').innerHTML = '<pre>' + text + '</pre>';
+    document.getElementById('offres-result').style.display = 'block';
+    showToast('Analyse des offres générée');
+  } catch(err) { showToast('Erreur', 'error'); }
+  finally { setBtnLoading('btn-analyze-offres', false, '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4.5H13l-3.8 2.8 1.5 4.5L7 10.1 3.3 12.8l1.5-4.5L1 5.5h4.5L7 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg> Analyser et comparer les offres'); }
+}
+
+// ============================================================
+// CALENDRIER
+// ============================================================
+async function generateCalendar() {
+  if (planData.length === 0) { showToast('Générez d\'abord le plan de formation', 'info'); return; }
+  const debut = document.getElementById('log-debut').value;
+  const lieu = document.getElementById('log-lieu').value || 'Salle de formation';
+  const groupe = document.getElementById('log-groupe').value || '15';
+  const contraintes = document.getElementById('log-contraintes').value;
+  const apiKey = document.getElementById('api-key-b').value.trim();
+  setBtnLoading('btn-gen-cal', true);
+
+  const prompt = `Tu es coordinateur formation. Génère un calendrier prévisionnel détaillé.
+
+Date de début : ${debut || '02/01/2025'}
+Lieu : ${lieu}
+Groupe max : ${groupe} personnes
+Contraintes : ${contraintes || 'aucune'}
+
+Actions à planifier :
+${planData.map(p => `- ${p.action} | ${p.duree}j | ${p.periode} | Pop: ${p.population}`).join('\n')}
+
+Génère un calendrier mois par mois avec dates, groupes, lieux. Format clair et professionnel.`;
+
+  try {
+    let text = '';
+    if (apiKey) {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1200, messages: [{ role: 'user', content: prompt }] })
+      });
+      const data = await res.json();
+      text = data.content?.[0]?.text || '';
+    } else {
+      await new Promise(r => setTimeout(r, 900));
+      text = `CALENDRIER PRÉVISIONNEL DE FORMATION — ${document.getElementById('p-annee')?.value || '2025'}\n\nT1 — JANVIER / MARS\n• Janv. 20-21 : Sécurité au travail et EPI (Groupe A — 12 participants) — ${lieu}\n• Fév. 10-11 : ISO 9001:2015 — Audit interne (Groupe A — 8 participants) — ${lieu}\n• Mars 03-04 : Lean Manufacturing (Groupe A — 10 participants) — ${lieu}\n\nT2 — AVRIL / JUIN\n• Avr. 14 : Management opérationnel (Groupe A — 15 participants) — ${lieu}\n• Mai 19 : Excel avancé (Groupe A — 12 participants) — ${lieu}\n\nNotes logistiques :\n- Convocations à envoyer J-15\n- Salle à réserver J-21\n- Feuilles de présence préparées J-7\n- Évaluations à chaud prévues en fin de chaque session`;
+    }
+    document.getElementById('cal-content').innerHTML = '<pre>' + text + '</pre>';
+    document.getElementById('cal-result').style.display = 'block';
+    showToast('Calendrier généré');
+  } catch(err) { showToast('Erreur', 'error'); }
+  finally { setBtnLoading('btn-gen-cal', false, '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4.5H13l-3.8 2.8 1.5 4.5L7 10.1 3.3 12.8l1.5-4.5L1 5.5h4.5L7 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg> Générer le calendrier'); }
+}
+
+// ============================================================
+// EMAILS
+// ============================================================
+async function generateEmail() {
+  const formation = document.getElementById('email-formation').value || 'Formation';
+  const date = document.getElementById('email-date').value;
+  const formateur = document.getElementById('email-formateur').value;
+  const signataire = document.getElementById('email-signataire').value;
+  const participants = document.getElementById('email-participants').value;
+  const apiKey = document.getElementById('api-key-b').value.trim();
+  setBtnLoading('btn-gen-email', true);
+
+  const prompt = `Rédige un courriel d'invitation professionnel et chaleureux pour convoquer des participants à une formation.
+
+Formation : ${formation}
+Date et lieu : ${date}
+Formateur : ${formateur}
+Signataire : ${signataire}
+Participants : ${participants || 'les participants concernés'}
+
+Le courriel doit inclure : objet, corps (contexte + informations pratiques + ce qu'il faut apporter + confirmation attendue), formule de politesse. Ton professionnel mais accessible.`;
+
+  try {
+    let text = '';
+    if (apiKey) {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 800, messages: [{ role: 'user', content: prompt }] })
+      });
+      const data = await res.json();
+      text = data.content?.[0]?.text || '';
+    } else {
+      await new Promise(r => setTimeout(r, 700));
+      text = `Objet : Convocation à la formation — ${formation}\n\nMadame, Monsieur,\n\nNous avons le plaisir de vous informer que vous êtes sélectionné(e) pour participer à la formation :\n\n   ${formation}\n   Date(s) : ${date || '[à compléter]'}\n   Formateur/Cabinet : ${formateur || '[à compléter]'}\n\nCette action de formation s'inscrit dans le plan de développement des compétences de notre entreprise. Votre participation contribuera directement à l'amélioration de vos pratiques professionnelles et à la performance de votre équipe.\n\nNous vous remercions de :\n- Confirmer votre présence par retour de courriel\n- Vous munir d'un stylo et d'un carnet de notes\n- Prévoir une tenue adaptée aux activités pratiques\n\nEn cas d'empêchement de dernière minute, veuillez nous en informer au plus tôt afin que nous puissions organiser votre remplacement.\n\nCordialement,\n\n${signataire || 'La Direction des Ressources Humaines'}`;
+    }
+    document.getElementById('email-content').innerHTML = '<pre>' + text + '</pre>';
+    document.getElementById('email-result').style.display = 'block';
+    showToast('Courriel généré');
+  } catch(err) { showToast('Erreur', 'error'); }
+  finally { setBtnLoading('btn-gen-email', false, '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4.5H13l-3.8 2.8 1.5 4.5L7 10.1 3.3 12.8l1.5-4.5L1 5.5h4.5L7 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg> Générer les courriels'); }
+}
+
+// ============================================================
+// EXPORT CSV
+// ============================================================
+function exportPlanCSV() {
+  if (planData.length === 0) { showToast('Aucun plan à exporter', 'info'); return; }
+  const headers = ['id','action','population','type','duree','budget','priorite','periode','source','justification'];
+  const csv = [headers.join(';'), ...planData.map(r => headers.map(h => `"${(r[h]||'').toString().replace(/"/g,'""')}"`).join(';'))].join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'ModuleB_Plan_Formation.csv'; a.click();
+  showToast('Export CSV généré');
+}
+
+function copyEmail() {
+  const text = document.getElementById('email-content')?.innerText || '';
+  navigator.clipboard.writeText(text).then(() => showToast('Courriel copié'));
+}
+
+function printSection(id) { window.print(); }
+
+// INIT
+document.getElementById('log-debut').value = new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>
