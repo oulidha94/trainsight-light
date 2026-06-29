@@ -423,6 +423,12 @@
           <span class="section-title">Paramètres du cahier des charges</span>
         </div>
         <div class="section-body">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:0.8rem;">
+            <button class="btn btn-secondary btn-sm" onclick="loadDemoCDC()" style="border-color:var(--accent-2);color:var(--accent-2);display:flex;align-items:center;gap:0.5rem;">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1C3.46 1 1 3.46 1 6.5S3.46 12 6.5 12 12 9.54 12 6.5 9.54 1 6.5 1z" stroke="currentColor" stroke-width="1.5"/><path d="M5 4.5L9 6.5 5 8.5V4.5z" fill="currentColor"/></svg>
+              Charger un exemple démo
+            </button>
+          </div>
           <div class="form-grid">
             <div class="form-group">
               <label>Entreprise commanditaire</label>
@@ -477,6 +483,12 @@
           <span class="section-title">Analyse des offres prestataires</span>
         </div>
         <div class="section-body">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:0.8rem;">
+            <button class="btn btn-secondary btn-sm" onclick="loadDemoOffres()" style="border-color:var(--accent-2);color:var(--accent-2);display:flex;align-items:center;gap:0.5rem;">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1C3.46 1 1 3.46 1 6.5S3.46 12 6.5 12 12 9.54 12 6.5 9.54 1 6.5 1z" stroke="currentColor" stroke-width="1.5"/><path d="M5 4.5L9 6.5 5 8.5V4.5z" fill="currentColor"/></svg>
+              Charger un exemple démo
+            </button>
+          </div>
           <div class="form-group" style="margin-bottom:1rem;">
             <label>Offres reçues (coller le texte, séparées par ---)</label>
             <textarea id="offres-text" style="min-height:150px;" placeholder="Coller ici le texte des offres reçues des bureaux de formation. Séparez chaque offre par une ligne ---"></textarea>
@@ -539,6 +551,12 @@
           <span class="section-title">Paramètres logistiques</span>
         </div>
         <div class="section-body">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:0.8rem;">
+            <button class="btn btn-secondary btn-sm" onclick="loadDemoCalendar()" style="border-color:var(--accent-2);color:var(--accent-2);display:flex;align-items:center;gap:0.5rem;">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1C3.46 1 1 3.46 1 6.5S3.46 12 6.5 12 12 9.54 12 6.5 9.54 1 6.5 1z" stroke="currentColor" stroke-width="1.5"/><path d="M5 4.5L9 6.5 5 8.5V4.5z" fill="currentColor"/></svg>
+              Charger un exemple démo
+            </button>
+          </div>
           <div class="form-grid">
             <div class="form-group">
               <label>Date de début du plan</label>
@@ -585,6 +603,12 @@
           <span class="section-title">Génération des courriels d'invitation</span>
         </div>
         <div class="section-body">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:0.8rem;">
+            <button class="btn btn-secondary btn-sm" onclick="loadDemoEmail()" style="border-color:var(--accent-2);color:var(--accent-2);display:flex;align-items:center;gap:0.5rem;">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1C3.46 1 1 3.46 1 6.5S3.46 12 6.5 12 12 9.54 12 6.5 9.54 1 6.5 1z" stroke="currentColor" stroke-width="1.5"/><path d="M5 4.5L9 6.5 5 8.5V4.5z" fill="currentColor"/></svg>
+              Charger un exemple démo
+            </button>
+          </div>
           <div class="form-grid">
             <div class="form-group">
               <label>Formation concernée</label>
@@ -1042,6 +1066,65 @@ function copyEmail() {
 }
 
 function printSection(id) { window.print(); }
+
+// ===============================================================
+// DÉMO — préremplissage CDC, calendrier, email
+// ===============================================================
+function loadDemoCDC() {
+  document.getElementById('cdc-entreprise').value = 'Société Tunisienne de Grande Industrie (STGI)';
+  document.getElementById('cdc-deadline').value = new Date(Date.now() + 21*24*60*60*1000).toISOString().split('T')[0];
+  document.getElementById('cdc-contact').value = 'Amira Trabelsi — a.trabelsi@stgi.com.tn';
+  document.getElementById('cdc-lot').value = 'Lot 1 — Sécurité & HSE / Lot 2 — Qualité ISO 9001';
+  document.getElementById('cdc-exigences').value = 'Formateur certifié HSE avec expérience industrie lourde. Sessions intra-entreprise, supports en français et arabe. Évaluation des acquis obligatoire en fin de session.';
+  showToast('Paramètres CDC chargés');
+}
+
+function loadDemoOffres() {
+  document.getElementById('offres-text').value = `PRESTATAIRE A — Cabinet Formation Excellence
+Formation HSE Niveau 1 (2 jours) : 1 800 DT HT
+Formateur : certifié NEBOSH, 12 ans expérience industrie
+Programme : réglementation, EPI, gestes d'urgence, exercices pratiques
+Références : STEG, Tunisair, Leoni
+---
+PRESTATAIRE B — Académie Pro Tunisie
+Formation HSE (2 jours) : 1 400 DT HT
+Formateur : expérience 5 ans, pas de certification internationale
+Programme : cours théoriques, peu de mises en situation
+Références : PME locales
+---
+PRESTATAIRE C — International Safety Training
+Formation HSE (3 jours) : 2 600 DT HT
+Formateur : certifié IOSH, bilingue FR/AR
+Programme : très complet, inclut simulation terrain, vidéos
+Références : OCP Maroc, Sonatrach, STGI (ancienne prestation 2022)`;
+  document.getElementById('nb-prestataires').value = '3';
+  document.getElementById('budget-lot').value = '25000';
+  showToast('Offres démo chargées');
+}
+
+function loadDemoCalendar() {
+  const debut = new Date();
+  debut.setDate(1);
+  debut.setMonth(debut.getMonth() + 1);
+  document.getElementById('log-debut').value = debut.toISOString().split('T')[0];
+  document.getElementById('log-lieu').value = 'Siège STGI — Salle de formation B2 (capacité 20 personnes)';
+  document.getElementById('log-groupe').value = '15';
+  document.getElementById('log-contraintes').value = 'Pas de formation en août. Éviter les lundis matin (réunion de production). Pas le vendredi après 14h.';
+  showToast('Paramètres calendrier chargés');
+}
+
+function loadDemoEmail() {
+  document.getElementById('email-formation').value = 'Sécurité au travail — Utilisation des EPI (HSE Niveau 1)';
+  document.getElementById('email-date').value = '20 et 21 janvier 2025 — Siège STGI, Salle B2';
+  document.getElementById('email-formateur').value = 'Cabinet Formation Excellence — M. Hassen Dridi';
+  document.getElementById('email-signataire').value = 'Amira Trabelsi — Responsable Ressources Humaines';
+  document.getElementById('email-participants').value = `Khaled Ben Salah — k.bensalah@stgi.com.tn
+Mohamed Ferchichi — m.ferchichi@stgi.com.tn
+Ines Bouaziz — i.bouaziz@stgi.com.tn
+Nabil Gharbi — n.gharbi@stgi.com.tn
+Sarra Jemli — s.jemli@stgi.com.tn`;
+  showToast('Données courriel chargées');
+}
 
 // INIT
 document.getElementById('log-debut').value = new Date().toISOString().split('T')[0];

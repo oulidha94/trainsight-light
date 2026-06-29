@@ -837,6 +837,14 @@
       </div>
     </div>
 
+    <!-- BOUTON DEMO -->
+    <div style="display:flex;justify-content:flex-end;margin-bottom:1rem;">
+      <button class="btn btn-secondary btn-sm" onclick="loadAgentDemo()" style="display:flex;align-items:center;gap:0.5rem;border-color:var(--accent);color:var(--accent);">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1C3.46 1 1 3.46 1 6.5S3.46 12 6.5 12 12 9.54 12 6.5 9.54 1 6.5 1z" stroke="currentColor" stroke-width="1.5"/><path d="M5 4.5L9 6.5 5 8.5V4.5z" fill="currentColor"/></svg>
+        Charger un exemple démo
+      </button>
+    </div>
+
     <!-- IDENTITE -->
     <div class="section">
       <div class="section-header">
@@ -1537,6 +1545,58 @@ function exportCSV() {
 }
 
 // ===============================================================
+// ===============================================================
+// DEMO AGENT — préremplissage formulaire
+// ===============================================================
+function loadAgentDemo() {
+  // Identité
+  document.getElementById('agent-nom').value = 'Nasri';
+  document.getElementById('agent-prenom').value = 'Karim';
+  document.getElementById('agent-poste').value = 'Ingénieur process';
+  document.getElementById('agent-fonction').value = 'Responsable amélioration continue';
+  document.getElementById('agent-structure').value = 'Direction Industrielle — R&D';
+  document.getElementById('agent-manager').value = 'Tarek Mansouri';
+  document.getElementById('agent-date').value = new Date().toISOString().split('T')[0];
+
+  // Vider les besoins existants
+  document.getElementById('besoins-list').innerHTML = '';
+  besoinsCount = 0;
+
+  // Besoin 1
+  addBesoin();
+  const id1 = besoinsCount;
+  setTimeout(() => {
+    document.getElementById('b' + id1 + '-theme').value = 'Lean Manufacturing — Outils Kaizen et 5S';
+    document.getElementById('b' + id1 + '-source').value = 'A';
+    document.querySelector('#besoin-' + id1 + ' .source-btn').classList.add('active');
+    document.getElementById('b' + id1 + '-competences').value = 'Déployer des chantiers Kaizen de façon autonome';
+    document.getElementById('b' + id1 + '-justif').value = "Dans le cadre du programme Lean lancé par la direction, je dois être capable de piloter des chantiers d'amélioration continue sur ma ligne. Objectif : améliorer le TRS de 61% à 75% d'ici fin d'année.";
+    document.getElementById('b' + id1 + '-ind-poste-av').value = '0 chantier Lean conduit de façon autonome';
+    document.getElementById('b' + id1 + '-ind-poste-ap').value = '2 chantiers Kaizen/5S par semestre';
+    document.getElementById('b' + id1 + '-ind-unit-av').value = 'TRS machine : 61%';
+    document.getElementById('b' + id1 + '-ind-unit-ap').value = 'TRS machine ≥ 75% à fin d'année';
+  }, 50);
+
+  // Besoin 2
+  addBesoin();
+  const id2 = besoinsCount;
+  setTimeout(() => {
+    document.getElementById('b' + id2 + '-theme').value = 'Analyse des données industrielles — Excel avancé & Power BI';
+    document.getElementById('b' + id2 + '-source').value = 'D';
+    const btns2 = document.querySelectorAll('#besoin-' + id2 + ' .source-btn');
+    btns2.forEach(b => b.classList.remove('active'));
+    btns2[3].classList.add('active');
+    document.getElementById('b' + id2 + '-competences').value = 'Construire des tableaux de bord de suivi de performance industrielle';
+    document.getElementById('b' + id2 + '-justif').value = "Le reporting de performance de ma ligne est actuellement manuel et prend 4h par semaine. Je veux automatiser le suivi des indicateurs clés (TRS, rebuts, temps d'arrêt) via Power BI.";
+    document.getElementById('b' + id2 + '-ind-poste-av').value = 'Reporting manuel : 4h/semaine';
+    document.getElementById('b' + id2 + '-ind-poste-ap').value = 'Tableau de bord automatisé mis à jour en temps réel';
+    document.getElementById('b' + id2 + '-ind-unit-av').value = 'Délai de détection des dérives : 48h';
+    document.getElementById('b' + id2 + '-ind-unit-ap').value = 'Détection des dérives en < 2h';
+  }, 100);
+
+  showToast('Exemple démo chargé');
+}
+
 // INIT — date par défaut + données démo pré-chargées
 // ===============================================================
 document.getElementById('agent-date').value = new Date().toISOString().split('T')[0];
